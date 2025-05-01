@@ -4,71 +4,13 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Clock, Scissors, User } from "lucide-react";
+import { mockAppointments } from "@/data/mock-clients";
 
 interface ClientViewHistoryModalProps {
   isOpen: boolean;
   onClose: () => void;
   client: any | null;
 }
-
-// Mock appointment history
-const mockAppointments = [
-  {
-    id: 1,
-    date: "2025-05-01",
-    time: "14:30",
-    service: "Corte Degradê",
-    barber: "Carlos Eduardo",
-    price: 45.00,
-    status: "completed",
-    paymentMethod: "Cartão de Crédito",
-    note: "Cliente muito satisfeito com o resultado"
-  },
-  {
-    id: 2,
-    date: "2025-04-15",
-    time: "16:00",
-    service: "Barba",
-    barber: "André Santos",
-    price: 35.00,
-    status: "completed",
-    paymentMethod: "PIX",
-    note: ""
-  },
-  {
-    id: 3,
-    date: "2025-03-30",
-    time: "10:15",
-    service: "Combo (Corte + Barba)",
-    barber: "Carlos Eduardo",
-    price: 70.00,
-    status: "completed",
-    paymentMethod: "Dinheiro",
-    note: "Cliente solicitou manter comprimento no topo"
-  },
-  {
-    id: 4,
-    date: "2025-03-10",
-    time: "11:00",
-    service: "Corte Simples",
-    barber: "João Victor",
-    price: 40.00,
-    status: "canceled",
-    paymentMethod: "-",
-    note: "Cliente não compareceu"
-  },
-  {
-    id: 5,
-    date: "2025-02-22",
-    time: "15:45",
-    service: "Corte Degradê + Sobrancelha",
-    barber: "Marcos Paulo",
-    price: 55.00,
-    status: "completed",
-    paymentMethod: "Cartão de Débito",
-    note: ""
-  }
-];
 
 export function ClientViewHistoryModal({ isOpen, onClose, client }: ClientViewHistoryModalProps) {
   if (!client) return null;
