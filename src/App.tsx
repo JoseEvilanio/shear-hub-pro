@@ -12,6 +12,7 @@ import Appointments from "./pages/Appointments";
 import Barbers from "./pages/Barbers";
 import NotFound from "./pages/NotFound";
 
+// Create a client
 const queryClient = new QueryClient();
 
 const App = () => (
