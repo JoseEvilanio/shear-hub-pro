@@ -10,25 +10,23 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { History, Trophy, User } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
+import { History, Trophy, User, Trash2 } from "lucide-react";
 
 interface ClientTableViewProps {
   clients: any[];
   onOpenHistory: (client: any) => void;
+  onEdit: (client: any) => void;
+  onDelete: (client: any) => void;
+  onToggleStatus: (clientId: number) => void;
 }
 
-export function ClientTableView({ clients, onOpenHistory }: ClientTableViewProps) {
-  const { toast } = useToast();
-  
-  const handleToggleStatus = (clientId: number) => {
-    // In a real app, this would call an API to update the client's status
-    toast({
-      title: "Status alterado",
-      description: "O status do cliente foi atualizado com sucesso.",
-    });
-  };
-  
+export function ClientTableView({ 
+  clients, 
+  onOpenHistory, 
+  onEdit, 
+  onDelete, 
+  onToggleStatus 
+}: ClientTableViewProps) {
   return (
     <div className="rounded-md border">
       <Table>
@@ -77,8 +75,9 @@ export function ClientTableView({ clients, onOpenHistory }: ClientTableViewProps
               <TableCell className="text-center">
                 <Badge 
                   className={client.status === "active" 
-                    ? "bg-emerald-500 hover:bg-emerald-600" 
-                    : "bg-gray-500 hover:bg-gray-600"}
+                    ? "bg-emerald-500 hover:bg-emerald-600 cursor-pointer" 
+                    : "bg-gray-500 hover:bg-gray-600 cursor-pointer"}
+                  onClick={() => onToggleStatus(client.id)}
                 >
                   {client.status === "active" ? "Ativo" : "Inativo"}
                 </Badge>
@@ -98,10 +97,19 @@ export function ClientTableView({ clients, onOpenHistory }: ClientTableViewProps
                     variant="outline" 
                     size="sm"
                     className="h-8 w-8 p-0"
-                    onClick={() => handleToggleStatus(client.id)}
+                    onClick={() => onEdit(client)}
                   >
                     <User size={14} />
                     <span className="sr-only">Editar</span>
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    className="h-8 w-8 p-0 text-red-500"
+                    onClick={() => onDelete(client)}
+                  >
+                    <Trash2 size={14} />
+                    <span className="sr-only">Excluir</span>
                   </Button>
                 </div>
               </TableCell>

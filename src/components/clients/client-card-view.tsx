@@ -1,28 +1,18 @@
 
-import { useState } from "react";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { History, Trophy, User } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
+import { History, Trophy, User, Trash2 } from "lucide-react";
 
 interface ClientCardViewProps {
   clients: any[];
   onOpenHistory: (client: any) => void;
+  onEdit: (client: any) => void;
+  onDelete: (client: any) => void;
 }
 
-export function ClientCardView({ clients, onOpenHistory }: ClientCardViewProps) {
-  const { toast } = useToast();
-  
-  const handleToggleStatus = (clientId: number) => {
-    // In a real app, this would call an API to update the client's status
-    toast({
-      title: "Status alterado",
-      description: "O status do cliente foi atualizado com sucesso.",
-    });
-  };
-  
+export function ClientCardView({ clients, onOpenHistory, onEdit, onDelete }: ClientCardViewProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
       {clients.map(client => (
@@ -84,11 +74,11 @@ export function ClientCardView({ clients, onOpenHistory }: ClientCardViewProps) 
               </div>
             )}
           </CardContent>
-          <CardFooter className="flex justify-between pt-0">
+          <CardFooter className="flex justify-between pt-0 gap-2">
             <Button 
               variant="outline" 
               size="sm"
-              className="w-full gap-1"
+              className="flex-1 gap-1"
               onClick={() => onOpenHistory(client)}
             >
               <History size={14} />
@@ -97,11 +87,19 @@ export function ClientCardView({ clients, onOpenHistory }: ClientCardViewProps) 
             <Button 
               variant="outline" 
               size="sm"
-              className="w-full gap-1 ml-2"
-              onClick={() => handleToggleStatus(client.id)}
+              className="flex-1 gap-1"
+              onClick={() => onEdit(client)}
             >
               <User size={14} />
               Editar
+            </Button>
+            <Button 
+              variant="outline"
+              size="sm"
+              className="text-red-500 w-9 p-0 flex-none"
+              onClick={() => onDelete(client)}
+            >
+              <Trash2 size={14} />
             </Button>
           </CardFooter>
         </Card>
