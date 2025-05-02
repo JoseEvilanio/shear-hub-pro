@@ -1,11 +1,12 @@
 
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
+import { Facebook } from "lucide-react";
 
 export function LoginForm() {
   const navigate = useNavigate();
@@ -26,6 +27,17 @@ export function LoginForm() {
         navigate("/cliente");
         toast.success("Login realizado com sucesso!");
       }
+    }, 1500);
+  };
+  
+  const handleSocialLogin = (provider: string) => {
+    setIsLoading(true);
+    
+    // Simulando login social
+    setTimeout(() => {
+      setIsLoading(false);
+      toast.success(`Login com ${provider} realizado com sucesso!`);
+      navigate(userType === "proprietario" ? "/dashboard" : "/cliente");
     }, 1500);
   };
 
@@ -60,12 +72,16 @@ export function LoginForm() {
           </form>
           
           <div className="flex items-center justify-between mt-4 text-sm">
-            <Button variant="link" size="sm">
-              Esqueci minha senha
-            </Button>
-            <Button variant="link" size="sm">
-              Criar conta
-            </Button>
+            <Link to="/forgot-password">
+              <Button variant="link" size="sm">
+                Esqueci minha senha
+              </Button>
+            </Link>
+            <Link to="/register">
+              <Button variant="link" size="sm">
+                Criar conta
+              </Button>
+            </Link>
           </div>
         </TabsContent>
         
@@ -85,12 +101,16 @@ export function LoginForm() {
           </form>
           
           <div className="flex items-center justify-between mt-4 text-sm">
-            <Button variant="link" size="sm">
-              Esqueci minha senha
-            </Button>
-            <Button variant="link" size="sm">
-              Criar conta
-            </Button>
+            <Link to="/forgot-password">
+              <Button variant="link" size="sm">
+                Esqueci minha senha
+              </Button>
+            </Link>
+            <Link to="/register">
+              <Button variant="link" size="sm">
+                Criar conta
+              </Button>
+            </Link>
           </div>
         </TabsContent>
       </Tabs>
@@ -104,23 +124,22 @@ export function LoginForm() {
         </div>
       </div>
       
-      <Button variant="outline" className="w-full">
-        <svg
-          className="mr-2 h-4 w-4"
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
-        </svg>
+      <Button 
+        variant="outline" 
+        className="w-full"
+        onClick={() => handleSocialLogin("Facebook")}
+        disabled={isLoading}
+      >
+        <Facebook className="mr-2 h-4 w-4" />
         Facebook
       </Button>
       
-      <Button variant="outline" className="w-full mt-2">
+      <Button 
+        variant="outline" 
+        className="w-full mt-2"
+        onClick={() => handleSocialLogin("Google")}
+        disabled={isLoading}
+      >
         <svg
           className="mr-2 h-4 w-4"
           xmlns="http://www.w3.org/2000/svg"
@@ -131,9 +150,9 @@ export function LoginForm() {
           strokeLinecap="round"
           strokeLinejoin="round"
         >
-          <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z" />
-          <path d="M4 12h16" />
-          <path d="M12 4v16" />
+          <circle cx="12" cy="12" r="10" />
+          <line x1="2" y1="12" x2="22" y2="12" />
+          <line x1="12" y1="2" x2="12" y2="22" />
         </svg>
         Google
       </Button>
