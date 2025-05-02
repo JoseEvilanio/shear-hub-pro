@@ -1,13 +1,17 @@
 
+import { useState } from "react";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Calendar, ChevronLeft, ChevronRight, Filter, Plus, Search } from "lucide-react";
+import { Calendar, ChevronLeft, ChevronRight, Plus, Search } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { AppointmentAddModal } from "@/components/appointments/appointment-add-modal";
 
 const Appointments = () => {
+  const [isAppointmentModalOpen, setIsAppointmentModalOpen] = useState(false);
+
   // Simulated appointments
   const appointments = [
     {
@@ -96,7 +100,10 @@ const Appointments = () => {
               Gerencie os agendamentos da sua barbearia
             </p>
           </div>
-          <Button className="bg-barber-gold hover:bg-barber-gold/80">
+          <Button 
+            className="bg-barber-gold hover:bg-barber-gold/80"
+            onClick={() => setIsAppointmentModalOpen(true)}
+          >
             <Plus className="mr-2 h-4 w-4" />
             Novo Agendamento
           </Button>
@@ -194,6 +201,11 @@ const Appointments = () => {
           </CardContent>
         </Card>
       </div>
+
+      <AppointmentAddModal 
+        isOpen={isAppointmentModalOpen} 
+        onClose={() => setIsAppointmentModalOpen(false)} 
+      />
     </DashboardLayout>
   );
 };

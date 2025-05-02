@@ -1,12 +1,18 @@
 
+import { useState } from "react";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { Button } from "@/components/ui/button";
 import { DashboardCards } from "@/components/dashboard/dashboard-cards";
 import { AppointmentCalendar } from "@/components/dashboard/appointment-calendar";
 import { BarbersSummary } from "@/components/dashboard/barbers-summary";
 import { Plus } from "lucide-react";
+import { BarberAddModal } from "@/components/barbers/barber-add-modal";
+import { AppointmentAddModal } from "@/components/appointments/appointment-add-modal";
 
 const Dashboard = () => {
+  const [isBarberModalOpen, setIsBarberModalOpen] = useState(false);
+  const [isAppointmentModalOpen, setIsAppointmentModalOpen] = useState(false);
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -18,11 +24,14 @@ const Dashboard = () => {
             </p>
           </div>
           <div className="flex items-center space-x-2">
-            <Button>
+            <Button onClick={() => setIsBarberModalOpen(true)}>
               <Plus className="mr-2 h-4 w-4" />
               Novo Barbeiro
             </Button>
-            <Button className="bg-barber-gold hover:bg-barber-gold/80">
+            <Button 
+              className="bg-barber-gold hover:bg-barber-gold/80"
+              onClick={() => setIsAppointmentModalOpen(true)}
+            >
               <Plus className="mr-2 h-4 w-4" />
               Novo Agendamento
             </Button>
@@ -40,6 +49,16 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
+
+      <BarberAddModal 
+        isOpen={isBarberModalOpen} 
+        onClose={() => setIsBarberModalOpen(false)} 
+      />
+      
+      <AppointmentAddModal 
+        isOpen={isAppointmentModalOpen} 
+        onClose={() => setIsAppointmentModalOpen(false)} 
+      />
     </DashboardLayout>
   );
 };
