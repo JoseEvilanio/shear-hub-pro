@@ -19,7 +19,16 @@ import Payments from "./pages/Payments";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
-import ClientBooking from "./pages/ClientBooking";
+
+// Cliente (Client) pages
+import ClientHome from "./pages/cliente/ClientHome";
+import ClientBarberShops from "./pages/cliente/ClientBarberShops";
+import ClientAppointments from "./pages/cliente/ClientAppointments";
+import ClientLoyalty from "./pages/cliente/ClientLoyalty";
+import ClientPayments from "./pages/cliente/ClientPayments";
+import ClientProfile from "./pages/cliente/ClientProfile";
+import ClientBarberShopDetail from "./pages/cliente/ClientBarberShopDetail";
+import ClientBookingForm from "./pages/cliente/ClientBookingForm";
 
 // Create a client
 const queryClient = new QueryClient();
@@ -45,8 +54,17 @@ const App = () => (
             <Route path="/dashboard/pagamentos" element={<Payments />} />
             <Route path="/dashboard/relatorios" element={<Reports />} />
             <Route path="/dashboard/configuracoes" element={<Settings />} />
-            <Route path="/cliente" element={<ClientBooking />} />
-            <Route path="/cliente/agendamento" element={<ClientBooking />} />
+            
+            {/* Client routes */}
+            <Route path="/cliente" element={<ClientHome />} />
+            <Route path="/cliente/barbearias" element={<ClientBarberShops />} />
+            <Route path="/cliente/agendamentos" element={<ClientAppointments />} />
+            <Route path="/cliente/fidelidade" element={<ClientLoyalty />} />
+            <Route path="/cliente/pagamentos" element={<ClientPayments />} />
+            <Route path="/cliente/perfil" element={<ClientProfile />} />
+            <Route path="/cliente/barbearia/:id" element={<ClientBarberShopDetail />} />
+            <Route path="/cliente/agendar/:barberShopId" element={<ClientBookingForm />} />
+            
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
