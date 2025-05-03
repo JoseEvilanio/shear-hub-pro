@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import { ClientLayout } from "@/components/layout/client-layout";
@@ -74,7 +73,7 @@ const bookingFormSchema = z.object({
   time: z.string({
     required_error: "Por favor, selecione um horário.",
   }),
-  paymentMethod: z.enum(["na_hora", "pix", "cartao"], {
+  paymentMethod: z.enum(["na_hora", "pix", "cartao", "carteira"], {
     required_error: "Por favor, selecione um método de pagamento.",
   }),
 });

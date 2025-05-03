@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
-import { Star, Gift, Calendar, Trophy, Scissors, Check } from "lucide-react";
+import { Star, Gift, Calendar, Trophy, Scissors, Check, User } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
@@ -109,7 +109,13 @@ const ClientLoyalty = () => {
                       <span>Progresso para próxima recompensa</span>
                       <span className="font-medium">{mockLoyaltyData.points}/{mockLoyaltyData.visitsRequired}</span>
                     </div>
-                    <Progress value={loyaltyProgress} className="h-2" indicatorClassName="bg-barber-gold" />
+                    <Progress 
+                      value={loyaltyProgress} 
+                      className="h-2" 
+                      style={{ 
+                        '--progress-background': 'hsl(var(--barber-gold))'
+                      } as React.CSSProperties} 
+                    />
                     <p className="text-xs text-muted-foreground text-center">
                       Faltam {mockLoyaltyData.visitsRequired - mockLoyaltyData.points} cortes para você ganhar um grátis!
                     </p>
@@ -226,7 +232,13 @@ const ClientLoyalty = () => {
                       <span>Indicações confirmadas</span>
                       <span className="font-medium">{mockReferralsData.totalReferrals}/{mockReferralsData.referralsRequired}</span>
                     </div>
-                    <Progress value={referralsProgress} className="h-2" indicatorClassName="bg-purple-500" />
+                    <Progress 
+                      value={referralsProgress} 
+                      className="h-2" 
+                      style={{ 
+                        '--progress-background': 'hsl(var(--purple-500))'
+                      } as React.CSSProperties} 
+                    />
                     <p className="text-xs text-muted-foreground text-center">
                       Faltam {mockReferralsData.referralsRequired - mockReferralsData.totalReferrals} indicações para você ganhar um corte grátis!
                     </p>

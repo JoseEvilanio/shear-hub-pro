@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
   Select,
   SelectContent,
@@ -82,6 +83,7 @@ const ClientHome = () => {
   const [maxDistance, setMaxDistance] = useState(5);
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [filteredShops, setFilteredShops] = useState(mockBarberShops);
+  const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
 
   // Filtrar barbearias baseado nos critérios
   useEffect(() => {
@@ -179,36 +181,116 @@ const ClientHome = () => {
                 <Label htmlFor="location-toggle">Usar minha localização</Label>
               </div>
 
-              <Button 
-                variant="outline" 
-                className="flex gap-2 whitespace-nowrap"
-                onClick={() => document.getElementById('filter-dialog')?.showModal()}
-              >
-                <Filter className="h-4 w-4" /> Filtros
-              </Button>
+              <Sheet open={isFilterSheetOpen} onOpenChange={setIsFilterSheetOpen}>
+                <SheetTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    className="flex gap-2 whitespace-nowrap"
+                  >
+                    <Filter className="h-4 w-4" /> Filtros
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-[300px] sm:w-[400px]">
+                  <h3 className="font-bold text-lg mb-4">Filtros</h3>
+                  
+                  <div className="space-y-6">
+                    {/* Filtros de barbearia */}
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label>Nota mínima</Label>
+                        <div className="flex items-center gap-2">
+                          <Star className="h-4 w-4 text-yellow-400" />
+                          <Slider 
+                            value={[minRating]} 
+                            min={0} 
+                            max={5} 
+                            step={0.5} 
+                            onValueChange={(val) => setMinRating(val[0])} 
+                            className="flex-1"
+                          />
+                          <span className="w-8 text-center">{minRating}</span>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label>Distância máxima (km)</Label>
+                        <div className="flex items-center gap-2">
+                          <MapPin className="h-4 w-4 text-muted-foreground" />
+                          <Slider 
+                            value={[maxDistance]} 
+                            min={1} 
+                            max={15} 
+                            step={0.5} 
+                            onValueChange={(val) => setMaxDistance(val[0])} 
+                            className="flex-1"
+                          />
+                          <span className="w-8 text-center">{maxDistance}</span>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label>Faixa de preço</Label>
+                        <div className="flex flex-wrap gap-2">
+                          {["baixo", "médio", "alto"].map((range) => (
+                            <Badge 
+                              key={range}
+                              variant={priceRange.includes(range) ? "default" : "outline"}
+                              className={`cursor-pointer ${priceRange.includes(range) ? "bg-barber-gold hover:bg-barber-gold/80" : ""}`}
+                              onClick={() => {
+                                if (priceRange.includes(range) && priceRange.length > 1) {
+                                  setPriceRange(prev => prev.filter(p => p !== range));
+                                } else if (!priceRange.includes(range)) {
+                                  setPriceRange(prev => [...prev, range]);
+                                }
+                              }}
+                            >
+                              {range === "baixo" ? "Econômico" : range === "médio" ? "Médio" : "Premium"}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label>Serviços</Label>
+                        <div className="flex flex-wrap gap-2">
+                          {availableServices.map((service) => (
+                            <Badge 
+                              key={service}
+                              variant={selectedServices.includes(service) ? "default" : "outline"}
+                              className={`cursor-pointer ${selectedServices.includes(service) ? "bg-barber-gold hover:bg-barber-gold/80" : ""}`}
+                              onClick={() => toggleService(service)}
+                            >
+                              {service}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex justify-end space-x-2">
+                      <Button 
+                        variant="outline" 
+                        onClick={() => {
+                          setMinRating(0);
+                          setMaxDistance(5);
+                          setPriceRange(["baixo", "médio", "alto"]);
+                          setSelectedServices([]);
+                          setIsFilterSheetOpen(false);
+                        }}
+                      >
+                        Limpar
+                      </Button>
+                      <Button 
+                        className="bg-barber-gold hover:bg-barber-gold/90"
+                        onClick={() => setIsFilterSheetOpen(false)}
+                      >
+                        Aplicar Filtros
+                      </Button>
+                    </div>
+                  </div>
+                </SheetContent>
+              </Sheet>
             </div>
-
-            {/* Dialog para filtros em dispositivos móveis */}
-            <dialog id="filter-dialog" className="modal modal-bottom sm:modal-middle">
-              <div className="modal-box bg-background p-6 rounded-lg shadow-lg space-y-4">
-                <h3 className="font-bold text-lg">Filtros</h3>
-                
-                {/* Filtros */}
-                <div className="space-y-4">
-                  {/* ... (aqui iriam os mesmos filtros que mostraremos abaixo) ... */}
-                </div>
-                
-                <div className="modal-action">
-                  <form method="dialog">
-                    <Button type="submit" variant="outline" className="mr-2">Cancelar</Button>
-                    <Button type="submit" className="bg-barber-gold hover:bg-barber-gold/90">Aplicar Filtros</Button>
-                  </form>
-                </div>
-              </div>
-              <form method="dialog" className="modal-backdrop">
-                <Button type="submit" className="hidden">close</Button>
-              </form>
-            </dialog>
           </CardContent>
         </Card>
 
