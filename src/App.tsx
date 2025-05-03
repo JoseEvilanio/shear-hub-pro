@@ -45,6 +45,7 @@ const App = () => (
             <Route path="/dashboard/pagamentos" element={<Payments />} />
             <Route path="/dashboard/relatorios" element={<Reports />} />
             <Route path="/dashboard/configuracoes" element={<Settings />} />
+            <Route path="/cliente" element={<ClientBooking />} />
             <Route path="/cliente/agendamento" element={<ClientBooking />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

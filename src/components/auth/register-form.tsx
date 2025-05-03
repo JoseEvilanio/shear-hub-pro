@@ -38,7 +38,13 @@ export function RegisterForm() {
     setTimeout(() => {
       setIsLoading(false);
       toast.success("Conta criada com sucesso!");
-      navigate("/login");
+      
+      // Redirect to client area if client, login if barbershop
+      if (userType === "cliente") {
+        navigate("/cliente");
+      } else {
+        navigate("/login");
+      }
     }, 1500);
   };
 
