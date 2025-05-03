@@ -19,6 +19,7 @@ import Payments from "./pages/Payments";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
+import ClientBooking from "./pages/ClientBooking";
 
 // Create a client
 const queryClient = new QueryClient();
@@ -44,6 +45,7 @@ const App = () => (
             <Route path="/dashboard/pagamentos" element={<Payments />} />
             <Route path="/dashboard/relatorios" element={<Reports />} />
             <Route path="/dashboard/configuracoes" element={<Settings />} />
+            <Route path="/cliente/agendamento" element={<ClientBooking />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
