@@ -1,1 +1,5 @@
+
 project_id = "lxluyeezxvhyqtjduwbb"
+
+[functions.promote-superuser]
+verify_jwt = true
