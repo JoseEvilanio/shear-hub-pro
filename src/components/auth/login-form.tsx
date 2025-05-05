@@ -13,6 +13,8 @@ export function LoginForm() {
   const navigate = useNavigate();
   const [userType, setUserType] = useState("cliente");
   const [isLoading, setIsLoading] = useState(false);
+  const [adminKey, setAdminKey] = useState("");
+  const [showAdminAccess, setShowAdminAccess] = useState(false);
 
   // Add this function to determine where to redirect the user based on their role
   const redirectBasedOnRole = async (userId: string, navigate: (path: string) => void) => {
@@ -81,6 +83,71 @@ export function LoginForm() {
     } catch (error: any) {
       console.error("Login error:", error);
       toast.error(error.message || "Erro ao fazer login");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCreateSuperUser = async () => {
+    setIsLoading(true);
+    try {
+      // Primeiro, vamos criar um usuário com dados básicos
+      const email = "admin@shearhub.com";
+      const password = "Admin123!";
+      
+      // Criar usuário com role de admin
+      const { data: authData, error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            first_name: "Admin",
+            last_name: "Sistema",
+            role: 'admin'
+          }
+        }
+      });
+      
+      if (signUpError) {
+        throw new Error('Erro ao criar usuário: ' + signUpError.message);
+      }
+      
+      if (!authData.user) {
+        throw new Error('Falha ao criar usuário');
+      }
+      
+      // Esperar um momento para o trigger criar o perfil
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Promover para superuser usando a edge function
+      const { data, error: promotionError } = await supabase.functions.invoke('promote-superuser', {
+        body: { 
+          user_id: authData.user.id,
+          admin_key: adminKey
+        }
+      });
+
+      if (promotionError) {
+        throw new Error('Erro ao promover usuário: ' + promotionError.message);
+      }
+      
+      toast.success(`Superusuário criado com sucesso! Email: ${email}, Senha: ${password}`);
+      
+      // Fazer login automático com o superuser criado
+      const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+      
+      if (loginError) {
+        throw loginError;
+      }
+      
+      navigate('/admin');
+      
+    } catch (error: any) {
+      console.error('Error creating superuser:', error);
+      toast.error(error.message || 'Ocorreu um erro ao criar o superusuário');
     } finally {
       setIsLoading(false);
     }
@@ -224,6 +291,43 @@ export function LoginForm() {
         </svg>
         Google
       </Button>
+
+      {/* Botão para revelar o acesso administrativo */}
+      <Button 
+        variant="link" 
+        className="w-full mt-4 text-xs opacity-50 hover:opacity-100" 
+        onClick={() => setShowAdminAccess(!showAdminAccess)}
+      >
+        {showAdminAccess ? "Ocultar acesso administrativo" : "Acesso administrativo"}
+      </Button>
+      
+      {/* Seção de administrador oculta */}
+      {showAdminAccess && (
+        <div className="border border-dashed border-yellow-500 p-4 rounded-md space-y-3 mt-2">
+          <h3 className="text-sm font-medium text-center">Criar Superusuário Padrão</h3>
+          <div className="space-y-2">
+            <Label htmlFor="admin-key">Chave de Administrador</Label>
+            <Input 
+              id="admin-key" 
+              value={adminKey}
+              onChange={(e) => setAdminKey(e.target.value)}
+              placeholder="Digite a chave de admin"
+              type="password"
+            />
+          </div>
+          <Button
+            type="button"
+            onClick={handleCreateSuperUser}
+            disabled={isLoading || !adminKey}
+            className="w-full bg-yellow-500 hover:bg-yellow-600 text-black"
+          >
+            {isLoading ? "Criando..." : "Criar Superusuário"}
+          </Button>
+          <p className="text-xs text-muted-foreground mt-2">
+            Isso criará um superusuário com email: admin@shearhub.com e senha: Admin123!
+          </p>
+        </div>
+      )}
     </div>
   );
 }
