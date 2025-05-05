@@ -10,6 +10,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Facebook, UserPlus } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const registerSchema = z.object({
   name: z.string().min(3, { message: "Nome deve ter pelo menos 3 caracteres" }),
@@ -31,12 +32,32 @@ export function RegisterForm() {
     },
   });
 
-  const handleRegister = (values: z.infer<typeof registerSchema>) => {
+  const handleRegister = async (values: z.infer<typeof registerSchema>) => {
     setIsLoading(true);
     
-    // Simulando registro
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      // Define o tipo de usuário baseado na seleção
+      const role = userType === "cliente" ? "client" : "owner";
+      const [firstName, ...lastNameParts] = values.name.split(' ');
+      const lastName = lastNameParts.join(' ');
+      
+      // Register the user with Supabase
+      const { data, error } = await supabase.auth.signUp({
+        email: values.email,
+        password: values.password,
+        options: {
+          data: {
+            first_name: firstName,
+            last_name: lastName || '',
+            role: role, // Armazena a função do usuário nos metadados
+          }
+        }
+      });
+
+      if (error) {
+        throw error;
+      }
+
       toast.success("Conta criada com sucesso!");
       
       // Redirect to client area if client, login if barbershop
@@ -45,7 +66,12 @@ export function RegisterForm() {
       } else {
         navigate("/login");
       }
-    }, 1500);
+    } catch (error: any) {
+      toast.error(error.message || "Erro ao criar conta");
+      console.error("Erro de registro:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSocialRegister = (provider: string) => {

@@ -1,4 +1,3 @@
-
 import {
   Table,
   TableBody,
@@ -39,8 +38,9 @@ export function UsersTable({ users }: UsersTableProps) {
       case 'owner':
         return <Badge variant="default" className="bg-blue-500">Proprietário</Badge>;
       case 'admin':
-      case 'superuser':
         return <Badge className="bg-purple-500">Administrador</Badge>;
+      case 'superuser':
+        return <Badge className="bg-red-500">Super Admin</Badge>;
       default:
         return <Badge variant="outline">{role}</Badge>;
     }

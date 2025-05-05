@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -7,11 +6,45 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { Facebook } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 
 export function LoginForm() {
   const navigate = useNavigate();
   const [userType, setUserType] = useState("cliente");
   const [isLoading, setIsLoading] = useState(false);
+
+  // Add this function to determine where to redirect the user based on their role
+  const redirectBasedOnRole = async (userId: string, navigate: (path: string) => void) => {
+    try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', userId)
+        .single();
+      
+      if (profile) {
+        switch (profile.role) {
+          case 'superuser':
+          case 'admin':
+            navigate('/admin');
+            break;
+          case 'owner':
+            navigate('/dashboard');
+            break;
+          case 'client':
+            navigate('/cliente');
+            break;
+          default:
+            navigate('/cliente');
+        }
+      } else {
+        navigate('/cliente'); // Default fallback
+      }
+    } catch (error) {
+      console.error("Error fetching user role:", error);
+      navigate('/cliente'); // Default fallback on error
+    }
+  };
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();

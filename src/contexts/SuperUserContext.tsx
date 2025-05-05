@@ -20,7 +20,6 @@ export const useSuperUser = () => useContext(SuperUserContext);
 export function SuperUserProvider({ children }: { children: ReactNode }) {
   const [isSuperUser, setIsSuperUser] = useState(false);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const checkSuperUserStatus = async () => {
@@ -33,9 +32,14 @@ export function SuperUserProvider({ children }: { children: ReactNode }) {
           return;
         }
 
-        // Check if user is a superuser
-        const isAdmin = await adminApi.isSuperUser();
-        setIsSuperUser(isAdmin);
+        // Check if user is a superuser or admin by getting their profile
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', session.user.id)
+          .single();
+        
+        setIsSuperUser(profile?.role === 'superuser' || profile?.role === 'admin');
       } catch (error) {
         console.error('Error checking superuser status:', error);
       } finally {
@@ -56,7 +60,7 @@ export function SuperUserProvider({ children }: { children: ReactNode }) {
     return () => {
       subscription.unsubscribe();
     };
-  }, [navigate]);
+  }, []);
 
   return (
     <SuperUserContext.Provider value={{ isSuperUser, loading }}>
