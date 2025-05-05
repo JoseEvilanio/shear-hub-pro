@@ -44,11 +44,11 @@ export function SearchBar({
   const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
 
   const toggleService = (service: string) => {
-    setSelectedServices(prev => 
-      prev.includes(service)
-        ? prev.filter(s => s !== service)
-        : [...prev, service]
-    );
+    if (selectedServices.includes(service)) {
+      setSelectedServices(selectedServices.filter(s => s !== service));
+    } else {
+      setSelectedServices([...selectedServices, service]);
+    }
   };
 
   return (
@@ -138,9 +138,9 @@ export function SearchBar({
                           className={`cursor-pointer ${priceRange.includes(range) ? "bg-barber-gold hover:bg-barber-gold/80" : ""}`}
                           onClick={() => {
                             if (priceRange.includes(range) && priceRange.length > 1) {
-                              setPriceRange(prev => prev.filter(p => p !== range));
+                              setPriceRange(priceRange.filter(p => p !== range));
                             } else if (!priceRange.includes(range)) {
-                              setPriceRange(prev => [...prev, range]);
+                              setPriceRange([...priceRange, range]);
                             }
                           }}
                         >
