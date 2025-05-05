@@ -39,6 +39,7 @@ import AdminPayments from "./pages/admin/AdminPayments";
 import AdminReports from "./pages/admin/AdminReports";
 import AdminNotifications from "./pages/admin/AdminNotifications";
 import AdminSettings from "./pages/admin/AdminSettings";
+import SuperUserManager from "./pages/admin/SuperUserManager";
 
 // Create a client
 const queryClient = new QueryClient();
@@ -84,6 +85,7 @@ const App = () => (
               <Route path="/admin/relatorios" element={<AdminReports />} />
               <Route path="/admin/notificacoes" element={<AdminNotifications />} />
               <Route path="/admin/configuracoes" element={<AdminSettings />} />
+              <Route path="/admin/superusers" element={<SuperUserManager />} />
               
               <Route path="*" element={<NotFound />} />
             </Routes>
