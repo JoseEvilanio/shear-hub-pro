@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -6,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { Facebook } from "lucide-react";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 
 export function LoginForm() {
   const navigate = useNavigate();
@@ -46,32 +47,66 @@ export function LoginForm() {
     }
   };
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
-    // Simulando login
-    setTimeout(() => {
-      setIsLoading(false);
-      if (userType === "proprietario") {
-        navigate("/dashboard");
-        toast.success("Login realizado com sucesso!");
-      } else {
-        navigate("/cliente");
-        toast.success("Login realizado com sucesso!");
+    try {
+      const formData = new FormData(e.target as HTMLFormElement);
+      const email = formData.get('email') as string;
+      const password = formData.get('password') as string;
+      
+      if (!email || !password) {
+        toast.error("Por favor, preencha todos os campos");
+        setIsLoading(false);
+        return;
       }
-    }, 1500);
+      
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+      
+      if (error) {
+        toast.error(error.message);
+        setIsLoading(false);
+        return;
+      }
+      
+      if (data.user) {
+        toast.success("Login realizado com sucesso!");
+        // Redirect based on user role
+        await redirectBasedOnRole(data.user.id, navigate);
+      }
+    } catch (error: any) {
+      console.error("Login error:", error);
+      toast.error(error.message || "Erro ao fazer login");
+    } finally {
+      setIsLoading(false);
+    }
   };
   
-  const handleSocialLogin = (provider: string) => {
+  const handleSocialLogin = async (provider: 'facebook' | 'google') => {
     setIsLoading(true);
     
-    // Simulando login social
-    setTimeout(() => {
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+      
+      if (error) {
+        toast.error(`Erro ao fazer login com ${provider}`);
+        console.error(error);
+      }
+    } catch (error) {
+      console.error(`${provider} login error:`, error);
+      toast.error(`Erro ao fazer login com ${provider}`);
+    } finally {
       setIsLoading(false);
-      toast.success(`Login com ${provider} realizado com sucesso!`);
-      navigate(userType === "proprietario" ? "/dashboard" : "/cliente");
-    }, 1500);
+    }
   };
 
   return (
@@ -93,11 +128,11 @@ export function LoginForm() {
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="cliente-email">Email</Label>
-              <Input id="cliente-email" placeholder="seu@email.com" type="email" required />
+              <Input id="cliente-email" name="email" placeholder="seu@email.com" type="email" required />
             </div>
             <div className="space-y-2">
               <Label htmlFor="cliente-password">Senha</Label>
-              <Input id="cliente-password" type="password" required />
+              <Input id="cliente-password" name="password" type="password" required />
             </div>
             <Button type="submit" className="w-full bg-barber-gold hover:bg-barber-gold/80" disabled={isLoading}>
               {isLoading ? "Entrando..." : "Entrar"}
@@ -122,11 +157,11 @@ export function LoginForm() {
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="prop-email">Email</Label>
-              <Input id="prop-email" placeholder="empresa@email.com" type="email" required />
+              <Input id="prop-email" name="email" placeholder="empresa@email.com" type="email" required />
             </div>
             <div className="space-y-2">
               <Label htmlFor="prop-password">Senha</Label>
-              <Input id="prop-password" type="password" required />
+              <Input id="prop-password" name="password" type="password" required />
             </div>
             <Button type="submit" className="w-full bg-barber-gold hover:bg-barber-gold/80" disabled={isLoading}>
               {isLoading ? "Entrando..." : "Entrar"}
@@ -160,7 +195,7 @@ export function LoginForm() {
       <Button 
         variant="outline" 
         className="w-full"
-        onClick={() => handleSocialLogin("Facebook")}
+        onClick={() => handleSocialLogin("facebook")}
         disabled={isLoading}
       >
         <Facebook className="mr-2 h-4 w-4" />
@@ -170,7 +205,7 @@ export function LoginForm() {
       <Button 
         variant="outline" 
         className="w-full mt-2"
-        onClick={() => handleSocialLogin("Google")}
+        onClick={() => handleSocialLogin("google")}
         disabled={isLoading}
       >
         <svg
