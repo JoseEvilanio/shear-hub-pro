@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { StatsCards } from '@/components/admin/StatsCards';
@@ -130,10 +129,12 @@ export default function AdminDashboard() {
               <BarbershopsTable 
                 barbershops={
                   [...barbershops]
-                    .sort((a, b) => 
-                      new Date(b.created_at || '').getTime() - 
-                      new Date(a.created_at || '').getTime()
-                    )
+                    .sort((a, b) => {
+                      // Check if created_at exists before using it
+                      const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+                      const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+                      return dateB - dateA;
+                    })
                     .slice(0, 5)
                 } 
                 onRefresh={fetchData} 

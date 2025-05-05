@@ -8,6 +8,7 @@ import {
   SubscriptionPlan,
   ActivityLog
 } from '@/types/admin';
+import { Json } from '@/integrations/supabase/types';
 
 export const adminApi = {
   // Fetch overall app stats
@@ -79,7 +80,7 @@ export const adminApi = {
   async getBarbershops(): Promise<BarbershopStats[]> {
     const { data: barbershops } = await supabase
       .from('barbershops')
-      .select('id, name, city, status, payment_status, next_payment_date');
+      .select('id, name, city, status, payment_status, next_payment_date, created_at');
     
     if (!barbershops) return [];
     
@@ -115,11 +116,14 @@ export const adminApi = {
       
       return {
         ...shop,
+        // Ensure status is properly typed
+        status: shop.status as 'active' | 'inactive' | 'blocked',
+        payment_status: shop.payment_status as 'active' | 'late' | 'blocked',
         clientCount: clientCount || 0,
         barberCount: barberCount || 0,
         appointmentCount: appointmentCount || 0,
         revenue
-      };
+      } as BarbershopStats;
     }));
     
     return barbershopsWithStats;
@@ -142,8 +146,10 @@ export const adminApi = {
       
       return {
         ...user,
+        // Ensure role is properly typed
+        role: user.role as 'client' | 'barber' | 'owner' | 'admin' | 'superuser',
         appointmentCount: appointmentCount || 0
-      };
+      } as UserStats;
     }));
     
     return usersWithStats;
@@ -167,8 +173,10 @@ export const adminApi = {
       
       return {
         ...payment,
+        // Ensure status is properly typed
+        status: payment.status as 'pending' | 'paid' | 'failed' | 'refunded',
         barbershop_name: barbershop?.name || 'Unknown'
-      };
+      } as PaymentStats;
     }));
     
     return paymentsWithShopNames;
@@ -195,7 +203,13 @@ export const adminApi = {
       .from('subscription_plans')
       .select('*');
     
-    return data || [];
+    if (!data) return [];
+
+    return data.map(plan => ({
+      ...plan,
+      // Cast features to the correct type
+      features: plan.features as unknown as Record<string, any>
+    })) as SubscriptionPlan[];
   },
 
   // Get activity logs
@@ -218,8 +232,10 @@ export const adminApi = {
       
       return {
         ...log,
+        // Cast metadata to the correct type
+        metadata: log.metadata as unknown as Record<string, any>,
         user_email: profile?.email || 'Unknown'
-      };
+      } as ActivityLog;
     }));
     
     return logsWithUserEmails;

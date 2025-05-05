@@ -10,6 +10,7 @@ export interface BarbershopStats {
   appointmentCount: number;
   revenue: number;
   next_payment_date?: string;
+  created_at?: string;
 }
 
 export interface UserStats {
