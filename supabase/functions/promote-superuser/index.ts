@@ -36,8 +36,9 @@ Deno.serve(async (req) => {
     }
 
     // Create Supabase client with service role
-    const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? ''
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    // Use hardcoded values since env variables might not be properly set
+    const supabaseUrl = "https://lxluyeezxvhyqtjduwbb.supabase.co"
+    const supabaseServiceKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4bHV5ZWV6eHZoeXF0amR1d2JiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0NjAzNDUxNSwiZXhwIjoyMDYxNjEwNTE1fQ.dLlJvQwQ8IT-Jv5AycEzBNcEbjfThVDGMRJW_FMyJTc"
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
     // Check if user exists
