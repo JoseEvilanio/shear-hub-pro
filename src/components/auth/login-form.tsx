@@ -15,6 +15,7 @@ export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [adminKey, setAdminKey] = useState("");
   const [showAdminAccess, setShowAdminAccess] = useState(false);
+  const [adminEmail, setAdminEmail] = useState("admin@gmail.com"); // Changed default email and added state
 
   // Add this function to determine where to redirect the user based on their role
   const redirectBasedOnRole = async (userId: string, navigate: (path: string) => void) => {
@@ -91,8 +92,8 @@ export function LoginForm() {
   const handleCreateSuperUser = async () => {
     setIsLoading(true);
     try {
-      // Primeiro, vamos criar um usuário com dados básicos
-      const email = "admin@shearhub.com";
+      // Usar o email que o usuário inseriu em vez de um valor fixo
+      const email = adminEmail;
       const password = "Admin123!";
       
       // Criar usuário com role de admin
@@ -306,6 +307,16 @@ export function LoginForm() {
         <div className="border border-dashed border-yellow-500 p-4 rounded-md space-y-3 mt-2">
           <h3 className="text-sm font-medium text-center">Criar Superusuário Padrão</h3>
           <div className="space-y-2">
+            <Label htmlFor="admin-email">Email do Administrador</Label>
+            <Input 
+              id="admin-email" 
+              value={adminEmail}
+              onChange={(e) => setAdminEmail(e.target.value)}
+              placeholder="Digite um email válido"
+              type="email"
+            />
+          </div>
+          <div className="space-y-2">
             <Label htmlFor="admin-key">Chave de Administrador</Label>
             <Input 
               id="admin-key" 
@@ -318,13 +329,13 @@ export function LoginForm() {
           <Button
             type="button"
             onClick={handleCreateSuperUser}
-            disabled={isLoading || !adminKey}
+            disabled={isLoading || !adminKey || !adminEmail}
             className="w-full bg-yellow-500 hover:bg-yellow-600 text-black"
           >
             {isLoading ? "Criando..." : "Criar Superusuário"}
           </Button>
           <p className="text-xs text-muted-foreground mt-2">
-            Isso criará um superusuário com email: admin@shearhub.com e senha: Admin123!
+            Isso criará um superusuário com o email fornecido e senha: Admin123!
           </p>
         </div>
       )}
