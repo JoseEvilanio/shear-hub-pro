@@ -1,122 +1,45 @@
 
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Facebook } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { LoginFormHeader } from "./login-form-header";
+import { EmailLoginForm } from "./email-login-form";
+import { SocialLoginButtons } from "./social-login-buttons";
+import { handleEmailPasswordLogin, handleSocialLogin } from "./auth-utils";
 
 export function LoginForm() {
   const navigate = useNavigate();
   const [userType, setUserType] = useState("cliente");
   const [isLoading, setIsLoading] = useState(false);
 
-  // Add this function to determine where to redirect the user based on their role
-  const redirectBasedOnRole = async (userId: string, navigate: (path: string) => void) => {
-    try {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', userId)
-        .single();
-      
-      if (profile) {
-        switch (profile.role) {
-          case 'superuser':
-          case 'admin':
-            navigate('/admin');
-            break;
-          case 'owner':
-            navigate('/dashboard');
-            break;
-          case 'client':
-            navigate('/cliente');
-            break;
-          default:
-            navigate('/cliente');
-        }
-      } else {
-        navigate('/cliente'); // Default fallback
-      }
-    } catch (error) {
-      console.error("Error fetching user role:", error);
-      navigate('/cliente'); // Default fallback on error
-    }
-  };
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
-    try {
-      const formData = new FormData(e.target as HTMLFormElement);
-      const email = formData.get('email') as string;
-      const password = formData.get('password') as string;
-      
-      if (!email || !password) {
-        toast.error("Por favor, preencha todos os campos");
-        setIsLoading(false);
-        return;
-      }
-      
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password
-      });
-      
-      if (error) {
-        toast.error(error.message);
-        setIsLoading(false);
-        return;
-      }
-      
-      if (data.user) {
-        toast.success("Login realizado com sucesso!");
-        // Redirect based on user role
-        await redirectBasedOnRole(data.user.id, navigate);
-      }
-    } catch (error: any) {
-      console.error("Login error:", error);
-      toast.error(error.message || "Erro ao fazer login");
-    } finally {
+    const formData = new FormData(e.target as HTMLFormElement);
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
+    
+    const success = await handleEmailPasswordLogin(email, password, navigate, setIsLoading);
+    
+    if (!success) {
       setIsLoading(false);
     }
   };
 
-  const handleSocialLogin = async (provider: 'facebook' | 'google') => {
+  const handleSocialLoginClick = async (provider: 'facebook' | 'google') => {
     setIsLoading(true);
+    const success = await handleSocialLogin(provider, setIsLoading);
     
-    try {
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider,
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
-        },
-      });
-      
-      if (error) {
-        toast.error(`Erro ao fazer login com ${provider}`);
-        console.error(error);
-      }
-    } catch (error) {
-      console.error(`${provider} login error:`, error);
-      toast.error(`Erro ao fazer login com ${provider}`);
-    } finally {
+    if (!success) {
       setIsLoading(false);
     }
   };
 
   return (
     <div className="w-full max-w-md mx-auto space-y-6 p-6 bg-card rounded-lg shadow-lg animate-fade-in">
-      <div className="text-center space-y-2">
-        <h1 className="text-3xl font-bold text-barber-gold">ShearHub</h1>
-        <p className="text-muted-foreground">
-          Plataforma completa para gerenciamento de barbearias
-        </p>
-      </div>
+      <LoginFormHeader />
 
       <Tabs defaultValue="cliente" onValueChange={setUserType} className="w-full">
         <TabsList className="grid w-full grid-cols-2 mb-6">
@@ -125,105 +48,26 @@ export function LoginForm() {
         </TabsList>
         
         <TabsContent value="cliente" className="space-y-4">
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="cliente-email">Email</Label>
-              <Input id="cliente-email" name="email" placeholder="seu@email.com" type="email" required />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="cliente-password">Senha</Label>
-              <Input id="cliente-password" name="password" type="password" required />
-            </div>
-            <Button type="submit" className="w-full bg-barber-gold hover:bg-barber-gold/80" disabled={isLoading}>
-              {isLoading ? "Entrando..." : "Entrar"}
-            </Button>
-          </form>
-          
-          <div className="flex items-center justify-between mt-4 text-sm">
-            <Link to="/forgot-password">
-              <Button variant="link" size="sm">
-                Esqueci minha senha
-              </Button>
-            </Link>
-            <Link to="/register">
-              <Button variant="link" size="sm">
-                Criar conta
-              </Button>
-            </Link>
-          </div>
+          <EmailLoginForm 
+            onSubmit={handleLogin} 
+            isLoading={isLoading}
+            userType="cliente"
+          />
         </TabsContent>
         
         <TabsContent value="proprietario" className="space-y-4">
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="prop-email">Email</Label>
-              <Input id="prop-email" name="email" placeholder="empresa@email.com" type="email" required />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="prop-password">Senha</Label>
-              <Input id="prop-password" name="password" type="password" required />
-            </div>
-            <Button type="submit" className="w-full bg-barber-gold hover:bg-barber-gold/80" disabled={isLoading}>
-              {isLoading ? "Entrando..." : "Entrar"}
-            </Button>
-          </form>
-          
-          <div className="flex items-center justify-between mt-4 text-sm">
-            <Link to="/forgot-password">
-              <Button variant="link" size="sm">
-                Esqueci minha senha
-              </Button>
-            </Link>
-            <Link to="/register">
-              <Button variant="link" size="sm">
-                Criar conta
-              </Button>
-            </Link>
-          </div>
+          <EmailLoginForm 
+            onSubmit={handleLogin} 
+            isLoading={isLoading}
+            userType="proprietario"
+          />
         </TabsContent>
       </Tabs>
       
-      <div className="relative my-4">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-muted"></div>
-        </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="px-2 bg-card text-muted-foreground">Ou entre com</span>
-        </div>
-      </div>
-      
-      <Button 
-        variant="outline" 
-        className="w-full"
-        onClick={() => handleSocialLogin("facebook")}
-        disabled={isLoading}
-      >
-        <Facebook className="mr-2 h-4 w-4" />
-        Facebook
-      </Button>
-      
-      <Button 
-        variant="outline" 
-        className="w-full mt-2"
-        onClick={() => handleSocialLogin("google")}
-        disabled={isLoading}
-      >
-        <svg
-          className="mr-2 h-4 w-4"
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <circle cx="12" cy="12" r="10" />
-          <line x1="2" y1="12" x2="22" y2="12" />
-          <line x1="12" y1="2" x2="12" y2="22" />
-        </svg>
-        Google
-      </Button>
+      <SocialLoginButtons 
+        onSocialLogin={handleSocialLoginClick}
+        isLoading={isLoading}
+      />
     </div>
   );
 }
