@@ -13,8 +13,7 @@ import {
   Settings, 
   Menu,
   LogOut,
-  Home,
-  User
+  Home
 } from "lucide-react";
 import { useState } from "react";
 
@@ -31,7 +30,6 @@ export function SidebarMenu() {
     { icon: CreditCard, label: "Pagamentos", href: "/dashboard/pagamentos" },
     { icon: BarChart, label: "Relatórios", href: "/dashboard/relatorios" },
     { icon: Settings, label: "Configurações", href: "/dashboard/configuracoes" },
-    { icon: User, label: "Área do Cliente", href: "/cliente/agendamento" },
   ];
 
   return (

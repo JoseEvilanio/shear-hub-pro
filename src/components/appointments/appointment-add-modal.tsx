@@ -1,84 +1,51 @@
 
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  Form,
-} from "@/components/ui/form";
-import { useToast } from "@/hooks/use-toast";
-import { appointmentFormSchema, AppointmentFormValues } from "./appointment-form-schema";
-import { ClientInfoFields } from "./client-info-fields";
-import { ServiceBarberFields } from "./service-barber-fields";
-import { DateTimeFields } from "./date-time-fields";
+import { useState } from "react";
+import { Calendar as CalendarIcon } from "lucide-react";
 
-interface AppointmentAddModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
-
-export function AppointmentAddModal({ isOpen, onClose }: AppointmentAddModalProps) {
-  const { toast } = useToast();
-  
-  const form = useForm<AppointmentFormValues>({
-    resolver: zodResolver(appointmentFormSchema),
-    defaultValues: {
-      client: "",
-      phone: "",
-      service: "",
-      barber: "",
-      time: "",
-    },
-  });
-
-  function onSubmit(values: AppointmentFormValues) {
-    // Em uma aplicação real, isso chamaria uma API para salvar o agendamento
-    console.log(values);
-    toast({
-      title: "Agendamento criado",
-      description: `Agendamento para ${values.client} criado com sucesso!`,
-    });
-    onClose();
-    form.reset();
-  }
+export function AppointmentAddModal() {
+  const [open, setOpen] = useState(false);
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button className="bg-barber-gold hover:bg-barber-gold/80">
+          <CalendarIcon className="mr-2 h-4 w-4" />
+          Novo Agendamento
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>Novo Agendamento</DialogTitle>
           <DialogDescription>
-            Preencha o formulário para agendar um novo cliente.
+            Crie um novo agendamento para um cliente
           </DialogDescription>
         </DialogHeader>
-        
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
-            <ClientInfoFields form={form} />
-            <ServiceBarberFields form={form} />
-            <DateTimeFields form={form} />
-            
-            <DialogFooter className="gap-2 sm:gap-0">
-              <Button type="button" variant="outline" onClick={onClose}>
-                Cancelar
-              </Button>
-              <Button 
-                type="submit" 
-                className="bg-barber-gold hover:bg-barber-gold/80"
-              >
-                Agendar
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
+        <div className="p-4">
+          <p className="text-center text-muted-foreground">
+            Funcionalidade em desenvolvimento.
+          </p>
+        </div>
+        <div className="flex justify-end">
+          <Button 
+            variant="outline" 
+            onClick={() => setOpen(false)} 
+            className="mr-2"
+          >
+            Cancelar
+          </Button>
+          <Button className="bg-barber-gold hover:bg-barber-gold/80">
+            Agendar
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   );

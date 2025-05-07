@@ -4,10 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BanknoteIcon, CreditCard, DollarSign, FileText, Filter, Printer, Search } from "lucide-react";
+import { BanknoteIcon, CreditCard, DollarSign, FileText, Filter, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { mockPayments } from "@/data/mock-payments";
 import { useState } from "react";
+import { PaymentAddModal } from "@/components/payments/payment-add-modal";
+import { PaymentReportModal } from "@/components/payments/payment-report-modal";
 
 const Payments = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -35,14 +37,8 @@ const Payments = () => {
             </p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline">
-              <Printer className="mr-2 h-4 w-4" />
-              Relatório
-            </Button>
-            <Button className="bg-barber-gold hover:bg-barber-gold/80">
-              <DollarSign className="mr-2 h-4 w-4" />
-              Novo Pagamento
-            </Button>
+            <PaymentReportModal />
+            <PaymentAddModal />
           </div>
         </div>
 

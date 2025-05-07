@@ -3,8 +3,11 @@ import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BarChart, Download, LineChart, PieChart, Calendar } from "lucide-react";
+import { BarChart, Download, LineChart, PieChart } from "lucide-react";
 import { mockReports } from "@/data/mock-reports";
+import { ReportPeriodSelector } from "@/components/reports/report-period-selector";
+import { useState } from "react";
+import { toast } from "sonner";
 
 // Import Recharts components
 import {
@@ -26,6 +29,28 @@ import {
 const Reports = () => {
   // Colors for charts
   const COLORS = ['#d4af37', '#8884d8', '#82ca9d', '#ffc658', '#ff8042'];
+  
+  // State for the report period
+  const [reportPeriod, setReportPeriod] = useState("month");
+  
+  // Function to handle period change
+  const handlePeriodChange = (period: string) => {
+    setReportPeriod(period);
+    toast.success(`Relatório alterado para ${
+      period === 'week' ? 'semanal' : 
+      period === 'month' ? 'mensal' : 
+      period === 'quarter' ? 'trimestral' : 'anual'
+    }`);
+  };
+  
+  // Function to handle report download
+  const handleDownloadReport = () => {
+    toast.success(`Relatório ${
+      reportPeriod === 'week' ? 'semanal' : 
+      reportPeriod === 'month' ? 'mensal' : 
+      reportPeriod === 'quarter' ? 'trimestral' : 'anual'
+    } baixado com sucesso!`);
+  };
 
   return (
     <DashboardLayout>
@@ -38,11 +63,8 @@ const Reports = () => {
             </p>
           </div>
           <div className="flex space-x-2">
-            <Button variant="outline">
-              <Calendar className="mr-2 h-4 w-4" />
-              Período
-            </Button>
-            <Button variant="outline">
+            <ReportPeriodSelector onPeriodChange={handlePeriodChange} />
+            <Button variant="outline" onClick={handleDownloadReport}>
               <Download className="mr-2 h-4 w-4" />
               Exportar
             </Button>
@@ -52,12 +74,16 @@ const Reports = () => {
         <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-md">Faturamento Mensal</CardTitle>
+              <CardTitle className="text-md">Faturamento {
+                reportPeriod === 'week' ? 'Semanal' : 
+                reportPeriod === 'month' ? 'Mensal' : 
+                reportPeriod === 'quarter' ? 'Trimestral' : 'Anual'
+              }</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-2xl font-bold">R$ {mockReports.monthlyRevenue.toFixed(2)}</p>
               <p className={`text-xs ${mockReports.revenueChange >= 0 ? "text-green-500" : "text-red-500"}`}>
-                {mockReports.revenueChange >= 0 ? "+" : ""}{mockReports.revenueChange}% vs mês anterior
+                {mockReports.revenueChange >= 0 ? "+" : ""}{mockReports.revenueChange}% vs período anterior
               </p>
             </CardContent>
           </Card>
@@ -69,7 +95,7 @@ const Reports = () => {
             <CardContent>
               <p className="text-2xl font-bold">{mockReports.totalAppointments}</p>
               <p className={`text-xs ${mockReports.appointmentsChange >= 0 ? "text-green-500" : "text-red-500"}`}>
-                {mockReports.appointmentsChange >= 0 ? "+" : ""}{mockReports.appointmentsChange}% vs mês anterior
+                {mockReports.appointmentsChange >= 0 ? "+" : ""}{mockReports.appointmentsChange}% vs período anterior
               </p>
             </CardContent>
           </Card>
@@ -81,7 +107,7 @@ const Reports = () => {
             <CardContent>
               <p className="text-2xl font-bold">{mockReports.newClients}</p>
               <p className={`text-xs ${mockReports.clientsChange >= 0 ? "text-green-500" : "text-red-500"}`}>
-                {mockReports.clientsChange >= 0 ? "+" : ""}{mockReports.clientsChange}% vs mês anterior
+                {mockReports.clientsChange >= 0 ? "+" : ""}{mockReports.clientsChange}% vs período anterior
               </p>
             </CardContent>
           </Card>
@@ -93,7 +119,7 @@ const Reports = () => {
             <CardContent>
               <p className="text-2xl font-bold">R$ {mockReports.averageTicket.toFixed(2)}</p>
               <p className={`text-xs ${mockReports.ticketChange >= 0 ? "text-green-500" : "text-red-500"}`}>
-                {mockReports.ticketChange >= 0 ? "+" : ""}{mockReports.ticketChange}% vs mês anterior
+                {mockReports.ticketChange >= 0 ? "+" : ""}{mockReports.ticketChange}% vs período anterior
               </p>
             </CardContent>
           </Card>
@@ -118,9 +144,13 @@ const Reports = () => {
           <TabsContent value="revenue">
             <Card>
               <CardHeader>
-                <CardTitle>Faturamento Mensal</CardTitle>
+                <CardTitle>Faturamento {
+                  reportPeriod === 'week' ? 'Semanal' : 
+                  reportPeriod === 'month' ? 'Mensal' : 
+                  reportPeriod === 'quarter' ? 'Trimestral' : 'Anual'
+                }</CardTitle>
                 <CardDescription>
-                  Análise de faturamento dos últimos 6 meses
+                  Análise de faturamento dos últimos períodos
                 </CardDescription>
               </CardHeader>
               <CardContent className="h-[400px]">
