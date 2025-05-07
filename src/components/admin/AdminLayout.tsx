@@ -1,4 +1,3 @@
-
 import { ReactNode, useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
@@ -41,18 +40,16 @@ function AdminLayoutBase({ children }: AdminLayoutProps) {
         }
         
         // Get user profile
-        const { data: profile } = await supabase
+        const { data: profile, error } = await supabase
           .from('profiles')
-          .select('first_name, last_name, role')
+          .select('email, role')
           .eq('id', session.user.id)
           .single();
         
         if (profile) {
-          // Set user name
-          const displayName = profile.first_name 
-            ? `${profile.first_name} ${profile.last_name || ''}`
-            : 'Admin';
-          setUserName(displayName);
+          // Set user name from email since first_name doesn't exist
+          const emailName = profile.email ? profile.email.split('@')[0] : 'Admin'; 
+          setUserName(emailName);
           
           // Check if user is admin or superuser
           if (profile.role !== 'admin' && profile.role !== 'superuser') {

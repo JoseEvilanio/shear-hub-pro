@@ -76,7 +76,6 @@ export const adminApi = {
     };
   },
 
-  // Fetch barbershops with stats
   async getBarbershops(): Promise<BarbershopStats[]> {
     const { data: barbershops } = await supabase
       .from('barbershops')
@@ -129,13 +128,16 @@ export const adminApi = {
     return barbershopsWithStats;
   },
 
-  // Fetch users with stats
+  // Fetch users with stats - Modified to work with the actual structure of the profiles table
   async getUsers(): Promise<UserStats[]> {
-    const { data: users } = await supabase
+    const { data: users, error } = await supabase
       .from('profiles')
-      .select('id, first_name, last_name, email, role, created_at, avatar_url');
+      .select('id, email, role, created_at');
     
-    if (!users) return [];
+    if (error || !users) {
+      console.error("Error fetching user profiles:", error);
+      return [];
+    }
     
     // For each user, get appointment count
     const usersWithStats = await Promise.all(users.map(async (user) => {
@@ -144,12 +146,19 @@ export const adminApi = {
         .select('*', { count: 'exact', head: true })
         .eq('client_id', user.id);
       
-      return {
-        ...user,
-        // Ensure role is properly typed
-        role: user.role as 'client' | 'barber' | 'owner' | 'admin' | 'superuser',
-        appointmentCount: appointmentCount || 0
-      } as UserStats;
+      // Create UserStats object with available data
+      const userStats: UserStats = {
+        id: user.id,
+        email: user.email || '',
+        role: (user.role as 'client' | 'barber' | 'owner' | 'admin' | 'superuser') || 'client',
+        first_name: '', // These fields don't exist in the DB, so we use empty strings
+        last_name: '',
+        created_at: user.created_at || '',
+        appointmentCount: appointmentCount || 0,
+        avatar_url: undefined
+      };
+
+      return userStats;
     }));
     
     return usersWithStats;
