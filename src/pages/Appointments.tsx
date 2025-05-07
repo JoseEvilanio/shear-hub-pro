@@ -1,9 +1,8 @@
-
 import { useState } from "react";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Calendar, ChevronLeft, ChevronRight, Plus, Search } from "lucide-react";
+import { Calendar, ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
@@ -104,7 +103,7 @@ const Appointments = () => {
             className="bg-barber-gold hover:bg-barber-gold/80"
             onClick={() => setIsAppointmentModalOpen(true)}
           >
-            <Plus className="mr-2 h-4 w-4" />
+            <Calendar className="mr-2 h-4 w-4" />
             Novo Agendamento
           </Button>
         </div>
