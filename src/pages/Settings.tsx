@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { Button } from "@/components/ui/button";
@@ -19,8 +18,10 @@ import {
   Save, 
   Users, 
   Bell, 
-  Settings as SettingsIcon 
+  Settings as SettingsIcon,
+  Clock
 } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const Settings = () => {
   // Business information state
@@ -227,48 +228,77 @@ const Settings = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  {Object.entries(workingHours).map(([day, hours]) => (
-                    <div key={day} className="flex items-center space-x-4">
-                      <div className="w-32">
-                        <Label>{getDayName(day)}</Label>
-                      </div>
-                      
-                      <Switch 
-                        checked={hours.isOpen}
-                        onCheckedChange={(checked) => handleHoursChange(day, 'isOpen', checked)}
-                      />
-                      
-                      <div className="grid grid-cols-2 gap-4 flex-1">
-                        <div>
-                          <Label htmlFor={`${day}-open`} className="sr-only">Abertura</Label>
-                          <Input
-                            id={`${day}-open`}
-                            type="time"
-                            value={hours.open}
-                            onChange={(e) => handleHoursChange(day, 'open', e.target.value)}
-                            disabled={!hours.isOpen}
-                          />
+                <form onSubmit={handleSubmit} className="space-y-2 md:space-y-3">
+                  <TooltipProvider>
+                    {Object.entries(workingHours).map(([day, hours]) => (
+                      <div
+                        key={day}
+                        className={`flex flex-col md:flex-row md:items-center md:space-x-4 p-2 rounded-lg transition-all ${hours.isOpen ? "bg-barber-gold/5" : "bg-muted/30"} border-b border-border last:border-b-0`}
+                      >
+                        <div className={`w-32 font-semibold text-base md:text-lg ${hours.isOpen ? "text-barber-gold" : "text-muted-foreground"}`}>
+                          {getDayName(day)}
                         </div>
-                        
-                        <div>
-                          <Label htmlFor={`${day}-close`} className="sr-only">Fechamento</Label>
-                          <Input
-                            id={`${day}-close`}
-                            type="time"
-                            value={hours.close}
-                            onChange={(e) => handleHoursChange(day, 'close', e.target.value)}
-                            disabled={!hours.isOpen}
-                          />
+                        <Tooltip delayDuration={200}>
+                          <TooltipTrigger asChild>
+                            <div>
+                              <Switch
+                                checked={hours.isOpen}
+                                onCheckedChange={(checked) => handleHoursChange(day, 'isOpen', checked)}
+                                className="scale-125 data-[state=checked]:bg-barber-gold"
+                              />
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent side="top">
+                            {hours.isOpen ? "Aberto neste dia" : "Fechado neste dia"}
+                          </TooltipContent>
+                        </Tooltip>
+                        <div className="grid grid-cols-2 gap-2 flex-1 mt-2 md:mt-0">
+                          <Tooltip delayDuration={200}>
+                            <TooltipTrigger asChild>
+                              <div className="relative">
+                                <Clock className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                <Input
+                                  id={`${day}-open`}
+                                  type="time"
+                                  value={hours.open}
+                                  onChange={(e) => handleHoursChange(day, 'open', e.target.value)}
+                                  disabled={!hours.isOpen}
+                                  className={`pl-8 ${!hours.isOpen ? "opacity-60 cursor-not-allowed" : ""}`}
+                                />
+                              </div>
+                            </TooltipTrigger>
+                            {!hours.isOpen && (
+                              <TooltipContent side="top">Ative o dia para editar o horário</TooltipContent>
+                            )}
+                          </Tooltip>
+                          <Tooltip delayDuration={200}>
+                            <TooltipTrigger asChild>
+                              <div className="relative">
+                                <Clock className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                <Input
+                                  id={`${day}-close`}
+                                  type="time"
+                                  value={hours.close}
+                                  onChange={(e) => handleHoursChange(day, 'close', e.target.value)}
+                                  disabled={!hours.isOpen}
+                                  className={`pl-8 ${!hours.isOpen ? "opacity-60 cursor-not-allowed" : ""}`}
+                                />
+                              </div>
+                            </TooltipTrigger>
+                            {!hours.isOpen && (
+                              <TooltipContent side="top">Ative o dia para editar o horário</TooltipContent>
+                            )}
+                          </Tooltip>
                         </div>
                       </div>
-                    </div>
-                  ))}
-
-                  <Button type="submit" className="bg-barber-gold hover:bg-barber-gold/80">
-                    <Save className="h-4 w-4 mr-2" />
-                    Salvar Alterações
-                  </Button>
+                    ))}
+                  </TooltipProvider>
+                  <div className="pt-4">
+                    <Button type="submit" className="bg-barber-gold hover:bg-barber-gold/80">
+                      <Save className="h-4 w-4 mr-2" />
+                      Salvar Alterações
+                    </Button>
+                  </div>
                 </form>
               </CardContent>
             </Card>

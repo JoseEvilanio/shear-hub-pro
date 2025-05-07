@@ -7,9 +7,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { AppointmentAddModal } from "@/components/appointments/appointment-add-modal";
+import { addDays, subDays, format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 
 const Appointments = () => {
   const [isAppointmentModalOpen, setIsAppointmentModalOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [calendarOpen, setCalendarOpen] = useState(false);
 
   // Simulated appointments
   const appointments = [
@@ -89,6 +95,19 @@ const Appointments = () => {
     }
   };
 
+  // Funções para navegação de datas
+  const handlePrevDate = () => {
+    // Para avançar/retroceder um dia:
+    setSelectedDate((prev) => subDays(prev, 1));
+    // Para semana, troque para: subDays(prev, 7)
+    // Para mês, troque para: subMonths(prev, 1)
+  };
+  const handleNextDate = () => {
+    setSelectedDate((prev) => addDays(prev, 1));
+    // Para semana, troque para: addDays(prev, 7)
+    // Para mês, troque para: addMonths(prev, 1)
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -111,14 +130,29 @@ const Appointments = () => {
         <div className="flex flex-col md:flex-row gap-4 md:items-center justify-between">
           <div className="flex flex-col md:flex-row gap-4 md:items-center">
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="icon">
+              <Button variant="outline" size="icon" onClick={handlePrevDate}>
                 <ChevronLeft className="h-4 w-4" />
               </Button>
-              <div className="flex items-center gap-2 bg-background border rounded-md px-3 py-2">
-                <Calendar className="h-4 w-4 text-muted-foreground" />
-                <span>12 Maio, 2023</span>
-              </div>
-              <Button variant="outline" size="icon">
+              <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="flex items-center gap-2 bg-background border rounded-md px-3 py-2"
+                  >
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    <span>{format(selectedDate, "dd MMMM, yyyy", { locale: ptBR })}</span>
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <CalendarComponent
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={(date) => { if(date) setSelectedDate(date); setCalendarOpen(false); }}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+              <Button variant="outline" size="icon" onClick={handleNextDate}>
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </div>

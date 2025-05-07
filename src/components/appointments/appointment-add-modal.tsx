@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -96,14 +95,6 @@ export function AppointmentAddModal({ isOpen, onClose }: AppointmentAddModalProp
 
   return (
     <Dialog open={isDialogOpen} onOpenChange={handleOpenChange}>
-      {!isOpen && (
-        <DialogTrigger asChild>
-          <Button className="bg-barber-gold hover:bg-barber-gold/80">
-            <CalendarIcon className="mr-2 h-4 w-4" />
-            Novo Agendamento
-          </Button>
-        </DialogTrigger>
-      )}
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>Novo Agendamento</DialogTitle>
