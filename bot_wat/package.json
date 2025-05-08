@@ -1,0 +1,17 @@
+{
+  "name": "whatsapp-bot",
+  "version": "1.0.0",
+  "description": "WhatsApp bot for automated customer service using Venom-bot",
+  "main": "venom-test.js",
+  "scripts": {
+    "start": "node venom-test.js",
+    "dev": "nodemon venom-test.js"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "venom-bot": "^5.0.21"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+} 
