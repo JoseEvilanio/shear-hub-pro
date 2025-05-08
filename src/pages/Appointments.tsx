@@ -139,7 +139,7 @@ const Appointments = () => {
                     variant="outline"
                     className="flex items-center gap-2 bg-background border rounded-md px-3 py-2"
                   >
-                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                <Calendar className="h-4 w-4 text-muted-foreground" />
                     <span>{format(selectedDate, "dd MMMM, yyyy", { locale: ptBR })}</span>
                   </Button>
                 </PopoverTrigger>
