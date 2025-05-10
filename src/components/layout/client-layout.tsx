@@ -1,4 +1,5 @@
 
+import { supabase } from "@/integrations/supabase/client";
 import { ReactNode } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -46,8 +47,8 @@ export function ClientLayout({ children }: ClientLayoutProps) {
     { name: "Perfil", path: "/cliente/perfil", icon: <User /> },
   ];
 
-  const handleLogout = () => {
-    // Em uma aplicação real, implementaria a lógica de logout aqui
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
     toast.success("Você saiu da sua conta");
     navigate("/login");
   };
