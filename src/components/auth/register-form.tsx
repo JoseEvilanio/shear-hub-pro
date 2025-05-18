@@ -59,7 +59,7 @@ export function RegisterForm() {
       }
 
       toast.success("Conta criada com sucesso!");
-      
+      await supabase.auth.signOut();
       // Redirect to client area if client, login if barbershop
       if (userType === "cliente") {
         navigate("/cliente");

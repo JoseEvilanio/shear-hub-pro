@@ -21,7 +21,7 @@ export const redirectBasedOnRole = async (userId: string, navigate: NavigateFunc
           navigate('/admin');
           break;
         case 'owner':
-          navigate('/dashboard');
+          navigate('/proprietario');
           break;
         case 'client':
           navigate('/cliente');
