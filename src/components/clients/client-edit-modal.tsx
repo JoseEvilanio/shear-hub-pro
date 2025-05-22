@@ -70,6 +70,9 @@ export function ClientEditModal({ isOpen, onClose, client }: ClientEditModalProp
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">Editar Cliente</DialogTitle>
+          <DialogDescription>
+            Edite os dados do cliente abaixo.
+          </DialogDescription>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">

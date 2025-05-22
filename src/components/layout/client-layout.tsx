@@ -13,16 +13,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { 
-  Home, 
-  Scissors, 
-  Calendar, 
-  Star, 
-  CreditCard, 
+import {
+  Home,
+  Scissors,
+  Calendar,
+  Star,
+  CreditCard,
   User,
-  LogOut, 
-  Menu,
-  X
+  LogOut,
+  Menu
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -51,7 +50,7 @@ export function ClientLayout({ children }: ClientLayoutProps) {
           return;
         }
         // Buscar dados do perfil do usuário
-        const { data: profile, error } = await supabase
+        const { data: profile } = await supabase
           .from("profiles")
           .select("first_name, last_name, avatar")
           .eq("id", session.user.id)
@@ -101,7 +100,7 @@ export function ClientLayout({ children }: ClientLayoutProps) {
   const NavItems = () => (
     <>
       {menuItems.map((item) => (
-        <Link 
+        <Link
           key={item.path}
           to={item.path}
           className={cn(
@@ -132,8 +131,8 @@ export function ClientLayout({ children }: ClientLayoutProps) {
             <SheetContent side="left" className="w-72">
               <nav className="grid gap-2 py-4">
                 <NavItems />
-                <Button 
-                  variant="ghost" 
+                <Button
+                  variant="ghost"
                   className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-destructive justify-start hover:bg-destructive/10"
                   onClick={handleLogout}
                 >
@@ -149,7 +148,7 @@ export function ClientLayout({ children }: ClientLayoutProps) {
             </span>
           </Link>
         </div>
-        
+
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-8 w-8 rounded-full">
@@ -184,12 +183,39 @@ export function ClientLayout({ children }: ClientLayoutProps) {
           </DropdownMenuContent>
         </DropdownMenu>
       </header>
-  
-      {/* Sidebar and content */}
+
+      {/* Sidebar e conteúdo principal */}
       <div className="flex flex-1">
-        {/* Sidebar removido para evitar duplicidade */}
-        {/* Main content */}
-        <main className="flex-1 h-[calc(100vh-4rem)] overflow-auto">
+        {/* Sidebar fixa para desktop */}
+        <aside className="hidden lg:flex flex-col w-64 bg-barber-black text-white border-r border-barber-gray min-h-[calc(100vh-4rem)]">
+          <div className="flex items-center gap-2 px-6 py-6 border-b border-barber-gray">
+            <Avatar className="h-10 w-10">
+              <AvatarImage src={avatarUrl} alt="Avatar" />
+              <AvatarFallback className="bg-barber-gold">
+                {userName ? userName.substring(0,2).toUpperCase() : "US"}
+              </AvatarFallback>
+            </Avatar>
+            <div className="ml-3">
+              <div className="font-semibold text-lg text-barber-gold">{userName}</div>
+              <div className="text-xs text-muted-foreground">Cliente</div>
+            </div>
+          </div>
+          <nav className="flex-1 flex flex-col gap-1 px-4 py-6">
+            <NavItems />
+          </nav>
+          <div className="px-4 pb-6 mt-auto">
+            <Button
+              variant="ghost"
+              className="flex items-center gap-3 w-full text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+              onClick={handleLogout}
+            >
+              <LogOut />
+              Sair
+            </Button>
+          </div>
+        </aside>
+        {/* Conteúdo principal */}
+        <main className="flex-1 h-[calc(100vh-4rem)] overflow-auto bg-background">
           <ScrollArea className="h-full">
             <div className="container max-w-7xl py-6 lg:py-8">
               {children}

@@ -6,12 +6,12 @@ import { toast } from "sonner";
 /**
  * Redirects user based on their role after successful authentication
  */
-export const redirectBasedOnRole = async (userId: string, navigate: NavigateFunction) => {
+export const redirectBasedOnRole = async (email: string, navigate: NavigateFunction) => {
   try {
     const { data: profile } = await supabase
       .from('profiles')
       .select('role')
-      .eq('id', userId)
+      .eq('email', email)
       .single();
     
     if (profile) {
@@ -30,11 +30,11 @@ export const redirectBasedOnRole = async (userId: string, navigate: NavigateFunc
           navigate('/cliente');
       }
     } else {
-      navigate('/cliente'); // Default fallback
+      navigate('/cliente'); // Fallback padrão
     }
   } catch (error) {
-    console.error("Error fetching user role:", error);
-    navigate('/cliente'); // Default fallback on error
+    console.error("Erro ao buscar o papel do usuário:", error);
+    navigate('/cliente'); // Fallback padrão em caso de erro
   }
 };
 
@@ -65,8 +65,8 @@ export const handleEmailPasswordLogin = async (
     
     if (data.user) {
       toast.success("Login realizado com sucesso!");
-      // Redirect based on user role
-      await redirectBasedOnRole(data.user.id, navigate);
+      // Redireciona baseado no papel do usuário usando o e-mail digitado
+      await redirectBasedOnRole(email, navigate);
       return true;
     }
     return false;

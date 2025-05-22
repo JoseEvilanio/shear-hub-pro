@@ -61,6 +61,9 @@ export function ClientAddModal({ isOpen, onClose }: ClientAddModalProps) {
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">Adicionar Novo Cliente</DialogTitle>
+          <DialogDescription>
+            Preencha os dados do novo cliente abaixo.
+          </DialogDescription>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">
