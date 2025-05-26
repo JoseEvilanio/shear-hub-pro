@@ -38,7 +38,9 @@ const Payments = () => {
           </div>
           <div className="flex gap-2">
             <PaymentReportModal />
-            <PaymentAddModal />
+            <PaymentAddModal open={false} onClose={function (): void {
+              throw new Error("Function not implemented.");
+            } } />
           </div>
         </div>
 

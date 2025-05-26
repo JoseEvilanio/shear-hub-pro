@@ -1,7 +1,8 @@
 
 // index.ts - Função promote-superuser para Supabase Edge Functions
 // ATENÇÃO: Certifique-se de definir variáveis de ambiente seguras em produção e NUNCA exponha chaves sensíveis!
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4'
+import { createClient } from '@supabase/supabase-js'
+import { serve } from "https://deno.land/std@0.181.0/http/server.ts";
 
 // Defina as origens permitidas para produção
 const allowedOrigins = [
@@ -16,7 +17,7 @@ const getCorsHeaders = (origin: string) => ({
   'Vary': 'Origin',
 });
 
-Deno.serve(async (req) => {
+serve(async (req) => {
   const origin = req.headers.get('origin') || '';
   const corsHeaders = getCorsHeaders(origin);
   if (req.method === 'OPTIONS') {
@@ -38,7 +39,7 @@ Deno.serve(async (req) => {
     }
 
     // Validação da chave admin via variável de ambiente
-    const ADMIN_KEY = Deno.env.get('ADMIN_KEY');
+    const ADMIN_KEY = process.env.ADMIN_KEY;
     if (!ADMIN_KEY) {
       return new Response(
         JSON.stringify({ error: 'Configuração inválida: ADMIN_KEY não definida no ambiente' }),
@@ -61,8 +62,8 @@ Deno.serve(async (req) => {
     }
 
     // Criação do cliente Supabase usando variáveis de ambiente
-    const supabaseUrl = Deno.env.get('SUPABASE_URL');
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_KEY');
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
     if (!supabaseUrl || !supabaseServiceKey) {
       return new Response(
         JSON.stringify({ error: 'Configuração inválida: SUPABASE_URL ou SUPABASE_SERVICE_KEY não definidas no ambiente' }),

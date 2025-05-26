@@ -1,6 +1,5 @@
 
 import { useState, useEffect } from "react";
-import { ClientLayout } from "@/components/layout/client-layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -132,6 +131,7 @@ const ClientBarberShops = () => {
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [filteredShops, setFilteredShops] = useState(mockBarberShops);
   const [showFilters, setShowFilters] = useState(false);
+  const [showMap, setShowMap] = useState(false);
   
   // Filtrar barbearias baseado nos critérios
   useEffect(() => {
@@ -185,7 +185,6 @@ const ClientBarberShops = () => {
   }, [useLocation]);
 
   return (
-    <ClientLayout>
       <div className="space-y-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
@@ -219,119 +218,12 @@ const ClientBarberShops = () => {
 
               <div className="flex items-center space-x-2">
                 <Switch
-                  id="location-toggle"
-                  checked={useLocation}
-                  onCheckedChange={setUseLocation}
+                  checked={showMap}
+                  onCheckedChange={setShowMap}
+                  id="show-map"
                 />
-                <Label htmlFor="location-toggle">Usar minha localização</Label>
+                <Label htmlFor="show-map">Ver no mapa</Label>
               </div>
-
-              <Popover open={showFilters} onOpenChange={setShowFilters}>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="flex gap-2 whitespace-nowrap">
-                    <Filter className="h-4 w-4" /> Filtros
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-80 md:w-96 p-4" align="end">
-                  <div className="space-y-4">
-                    <h3 className="font-medium">Filtros de Busca</h3>
-                    
-                    {/* Filtro por distância */}
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <Label>Distância máxima</Label>
-                        <span className="text-sm">{maxDistance} km</span>
-                      </div>
-                      <Slider
-                        min={1}
-                        max={10}
-                        step={0.5}
-                        defaultValue={[maxDistance]}
-                        onValueChange={(value) => setMaxDistance(value[0])}
-                      />
-                    </div>
-                    
-                    {/* Filtro por avaliação */}
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <Label>Avaliação mínima</Label>
-                        <div className="flex items-center">
-                          <span className="text-sm mr-1">{minRating}</span>
-                          <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
-                        </div>
-                      </div>
-                      <Slider
-                        min={0}
-                        max={5}
-                        step={0.5}
-                        defaultValue={[minRating]}
-                        onValueChange={(value) => setMinRating(value[0])}
-                      />
-                    </div>
-                    
-                    {/* Filtro por faixa de preço */}
-                    <div className="space-y-2">
-                      <Label>Faixa de preço</Label>
-                      <div className="flex flex-wrap gap-2">
-                        {priceRangeOptions.map((range) => (
-                          <Badge
-                            key={range}
-                            variant={priceRange.includes(range) ? "default" : "outline"}
-                            className={`cursor-pointer ${
-                              priceRange.includes(range) ? "bg-barber-gold hover:bg-barber-gold/90" : ""
-                            }`}
-                            onClick={() => togglePriceRange(range)}
-                          >
-                            {range === "baixo" ? "$ Econômico" : 
-                             range === "médio" ? "$$ Moderado" : 
-                             "$$$ Premium"}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                    
-                    {/* Filtro por serviços */}
-                    <div className="space-y-2">
-                      <Label>Serviços</Label>
-                      <div className="flex flex-wrap gap-2">
-                        {availableServices.map((service) => (
-                          <Badge
-                            key={service}
-                            variant={selectedServices.includes(service) ? "default" : "outline"}
-                            className={`cursor-pointer ${
-                              selectedServices.includes(service) ? "bg-barber-gold hover:bg-barber-gold/90" : ""
-                            }`}
-                            onClick={() => toggleService(service)}
-                          >
-                            {service}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                    
-                    {/* Botões de ações */}
-                    <div className="flex justify-between pt-2">
-                      <Button 
-                        variant="ghost" 
-                        onClick={() => {
-                          setMinRating(0);
-                          setMaxDistance(5);
-                          setPriceRange(["baixo", "médio", "alto"]);
-                          setSelectedServices([]);
-                        }}
-                      >
-                        Limpar filtros
-                      </Button>
-                      <Button 
-                        className="bg-barber-gold hover:bg-barber-gold/90"
-                        onClick={() => setShowFilters(false)}
-                      >
-                        Aplicar
-                      </Button>
-                    </div>
-                  </div>
-                </PopoverContent>
-              </Popover>
             </div>
           </CardContent>
         </Card>
@@ -496,7 +388,6 @@ const ClientBarberShops = () => {
           </Tabs>
         </div>
       </div>
-    </ClientLayout>
   );
 };
 

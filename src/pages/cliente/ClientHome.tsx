@@ -29,23 +29,17 @@ const ClientHome = () => {
       // Filtro de busca
       const matchesSearch = shop.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
                            shop.address.toLowerCase().includes(searchTerm.toLowerCase());
-      
       // Filtro de faixa de preço
       const matchesPrice = priceRange.includes(shop.priceRange);
-      
       // Filtro de avaliação
       const matchesRating = shop.rating >= minRating;
-      
       // Filtro de distância
       const matchesDistance = shop.distance <= maxDistance;
-      
       // Filtro de serviços
       const matchesServices = selectedServices.length === 0 || 
                              selectedServices.every(service => shop.services.includes(service));
-      
       return matchesSearch && matchesPrice && matchesRating && matchesDistance && matchesServices;
     });
-    
     setFilteredShops(filtered);
   }, [searchTerm, priceRange, minRating, maxDistance, selectedServices]);
 
@@ -58,7 +52,6 @@ const ClientHome = () => {
   }, [useLocation]);
 
   return (
-    <ClientLayout>
       <div className="space-y-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
@@ -119,7 +112,6 @@ const ClientHome = () => {
         {/* Seção de barbearias recentes ou favoritas */}
         <RecentBarberShops shops={mockBarberShops} />
       </div>
-    </ClientLayout>
   );
 };
 

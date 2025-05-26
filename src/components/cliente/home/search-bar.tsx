@@ -26,6 +26,8 @@ interface SearchBarProps {
   availableServices: string[];
 }
 
+import { Star, MapPin } from "lucide-react";
+
 export function SearchBar({
   searchTerm,
   setSearchTerm,
@@ -195,5 +197,3 @@ export function SearchBar({
     </Card>
   );
 }
-
-import { Star, MapPin } from "lucide-react";

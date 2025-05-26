@@ -56,11 +56,10 @@ export function ClientLayout({ children }: ClientLayoutProps) {
           .eq("id", session.user.id)
           .single();
         if (profile) {
-          setUserName(
-            profile.first_name && profile.last_name
-              ? `${profile.first_name} ${profile.last_name}`
-              : session.user.email.split("@")[0]
-          );
+          const firstName = profile.firstName || "";
+          const lastName = profile.lastName || "";
+          const fullName = `${firstName} ${lastName}`.trim();
+          setUserName(fullName ? fullName : session.user.email.split("@")[0]);
           setAvatarUrl(profile.avatar || "");
         } else {
           setUserName(session.user.email.split("@")[0]);

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ClientLayout } from "@/components/layout/client-layout";
@@ -187,113 +186,104 @@ const ClientAppointments = () => {
   };
 
   return (
-    <ClientLayout>
-      <div className="space-y-6">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Meus Agendamentos</h1>
-            <p className="text-muted-foreground">
-              Gerencie todos os seus agendamentos
-            </p>
-          </div>
-          <Button 
-            className="bg-barber-gold hover:bg-barber-gold/90"
-            onClick={() => navigate("/cliente")}
-          >
-            <Calendar className="mr-2 h-4 w-4" />
-            Novo Agendamento
-          </Button>
+    <div className="space-y-6">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Meus Agendamentos</h1>
+          <p className="text-muted-foreground">
+            Gerencie todos os seus agendamentos
+          </p>
         </div>
-
-        {/* Tabs para filtrar agendamentos */}
-        <Tabs defaultValue="upcoming" value={activeTab} onValueChange={setActiveTab}>
-          <div className="flex items-center justify-between">
-            <TabsList>
-              <TabsTrigger value="upcoming">Próximos</TabsTrigger>
-              <TabsTrigger value="completed">Concluídos</TabsTrigger>
-              <TabsTrigger value="canceled">Cancelados</TabsTrigger>
-            </TabsList>
-          </div>
-          
-          <TabsContent value="upcoming" className="mt-4">
-            {filteredAppointments.length > 0 ? (
-              <div className="space-y-4">
-                {filteredAppointments.map((appointment) => (
-                  <AppointmentCard
-                    key={appointment.id}
-                    appointment={appointment}
-                    onCancel={() => handleCancelAppointment(appointment.id)}
-                    onReschedule={() => handleRescheduleAppointment(appointment.id)}
-                    getStatusTheme={getStatusTheme}
-                    getStatusText={getStatusText}
-                    formatDate={formatDate}
-                  />
-                ))}
-              </div>
-            ) : (
-              <EmptyState 
-                title="Nenhum agendamento futuro"
-                description="Você não tem agendamentos marcados."
-                buttonText="Agendar Agora"
-                onClick={() => navigate("/cliente")}
-              />
-            )}
-          </TabsContent>
-          
-          <TabsContent value="completed" className="mt-4">
-            {filteredAppointments.length > 0 ? (
-              <div className="space-y-4">
-                {filteredAppointments.map((appointment) => (
-                  <AppointmentCard
-                    key={appointment.id}
-                    appointment={appointment}
-                    onCancel={() => {}}
-                    onReschedule={() => {}}
-                    getStatusTheme={getStatusTheme}
-                    getStatusText={getStatusText}
-                    formatDate={formatDate}
-                    showFeedback
-                  />
-                ))}
-              </div>
-            ) : (
-              <EmptyState 
-                title="Nenhum agendamento concluído"
-                description="Aqui aparecerão seus agendamentos finalizados."
-                buttonText="Agendar Agora"
-                onClick={() => navigate("/cliente")}
-              />
-            )}
-          </TabsContent>
-          
-          <TabsContent value="canceled" className="mt-4">
-            {filteredAppointments.length > 0 ? (
-              <div className="space-y-4">
-                {filteredAppointments.map((appointment) => (
-                  <AppointmentCard
-                    key={appointment.id}
-                    appointment={appointment}
-                    onCancel={() => {}}
-                    onReschedule={() => handleRescheduleAppointment(appointment.id)}
-                    getStatusTheme={getStatusTheme}
-                    getStatusText={getStatusText}
-                    formatDate={formatDate}
-                    showRebook
-                  />
-                ))}
-              </div>
-            ) : (
-              <EmptyState 
-                title="Nenhum agendamento cancelado"
-                description="Você não tem agendamentos cancelados."
-                buttonText="Agendar Agora"
-                onClick={() => navigate("/cliente")}
-              />
-            )}
-          </TabsContent>
-        </Tabs>
+        <Button 
+          className="bg-barber-gold hover:bg-barber-gold/90"
+          onClick={() => navigate("/cliente")}
+        >
+          <Calendar className="mr-2 h-4 w-4" />
+          Novo Agendamento
+        </Button>
       </div>
-    </ClientLayout>
+
+      {/* Tabs para filtrar agendamentos */}
+      <Tabs defaultValue="upcoming" value={activeTab} onValueChange={setActiveTab}>
+        <div className="flex items-center justify-between">
+          <TabsList>
+            <TabsTrigger value="upcoming">Próximos</TabsTrigger>
+            <TabsTrigger value="completed">Concluídos</TabsTrigger>
+            <TabsTrigger value="canceled">Cancelados</TabsTrigger>
+          </TabsList>
+        </div>
+        <TabsContent value="upcoming" className="mt-4">
+          {filteredAppointments.length > 0 ? (
+            <div className="space-y-4">
+              {filteredAppointments.map((appointment) => (
+                <AppointmentCard
+                  key={appointment.id}
+                  appointment={appointment}
+                  onCancel={() => handleCancelAppointment(appointment.id)}
+                  onReschedule={() => handleRescheduleAppointment(appointment.id)}
+                  getStatusTheme={getStatusTheme}
+                  getStatusText={getStatusText}
+                  formatDate={formatDate}
+                />
+              ))}
+            </div>
+          ) : (
+            <EmptyState 
+              title="Nenhum agendamento futuro"
+              description="Você não tem agendamentos marcados."
+            />
+          )}
+        </TabsContent>
+        <TabsContent value="completed" className="mt-4">
+          {filteredAppointments.length > 0 ? (
+            <div className="space-y-4">
+              {filteredAppointments.map((appointment) => (
+                <AppointmentCard
+                  key={appointment.id}
+                  appointment={appointment}
+                  onCancel={() => {}}
+                  onReschedule={() => {}}
+                  getStatusTheme={getStatusTheme}
+                  getStatusText={getStatusText}
+                  formatDate={formatDate}
+                  showFeedback
+                />
+              ))}
+            </div>
+          ) : (
+            <EmptyState 
+              title="Nenhum agendamento concluído"
+              description="Aqui aparecerão seus agendamentos finalizados."
+            />
+          )}
+        </TabsContent>
+        <TabsContent value="canceled" className="mt-4">
+          {filteredAppointments.length > 0 ? (
+            <div className="space-y-4">
+              {filteredAppointments.map((appointment) => (
+                <AppointmentCard
+                  key={appointment.id}
+                  appointment={appointment}
+                  onCancel={() => {}}
+                  onReschedule={() => handleRescheduleAppointment(appointment.id)}
+                  getStatusTheme={getStatusTheme}
+                  getStatusText={getStatusText}
+                  formatDate={formatDate}
+                  showRebook
+                />
+              ))}
+            </div>
+          ) : (
+            <EmptyState 
+              title="Nenhum agendamento cancelado"
+              description="Você não tem agendamentos cancelados."
+              buttonText="Agendar Novamente"
+              onClick={() => navigate("/cliente")}
+            />
+          )}
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 };
 

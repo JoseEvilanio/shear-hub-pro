@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { ClientLayout } from "@/components/layout/client-layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { CreditCard, Calendar, Search, Filter, Check, X, Clock } from "lucide-react";
 import { mockPayments } from "@/data/mock-payments";
 import { format } from "date-fns";
+import { PaymentAddModal } from "@/components/payments/payment-add-modal";
 
 // Mock para cartões salvos
 const mockSavedCards = [
@@ -38,6 +38,7 @@ const ClientPayments = () => {
   const [activeTab, setActiveTab] = useState("historico");
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [showAddCardModal, setShowAddCardModal] = useState(false);
   
   // Filtra os pagamentos baseado nos critérios
   const filteredPayments = mockPayments.filter((payment) => {
@@ -90,7 +91,7 @@ const ClientPayments = () => {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Pagamentos</h1>
           <p className="text-muted-foreground">
-            Gerencie seus métodos de pagamento e histórico
+            Visualize e gerencie seus pagamentos
           </p>
         </div>
 
@@ -247,10 +248,13 @@ const ClientPayments = () => {
                   </div>
                 ))}
                 
-                <Button variant="outline" className="w-full mt-2">
+                <Button variant="outline" className="w-full mt-2" onClick={() => setShowAddCardModal(true)}>
                   <CreditCard className="mr-2 h-4 w-4" />
                   Adicionar novo cartão
                 </Button>
+                {showAddCardModal && (
+                  <PaymentAddModal open={showAddCardModal} onClose={() => setShowAddCardModal(false)} />
+                )}
               </CardContent>
             </Card>
             
