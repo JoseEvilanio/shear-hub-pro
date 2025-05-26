@@ -9,13 +9,14 @@ import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { toast } from "sonner";
 import { KeyRound } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client"; // Import supabase
 
 const forgotPasswordSchema = z.object({
   email: z.string().email({ message: "Email inválido" }),
 });
 
 export function ForgotPasswordForm() {
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // Keep navigate if needed for other purposes, but not for success path here
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<z.infer<typeof forgotPasswordSchema>>({
@@ -25,15 +26,29 @@ export function ForgotPasswordForm() {
     },
   });
 
-  const handleSubmit = (values: z.infer<typeof forgotPasswordSchema>) => {
+  const handleSubmit = async (values: z.infer<typeof forgotPasswordSchema>) => {
     setIsLoading(true);
-    
-    // Simulando envio de email
-    setTimeout(() => {
+    try {
+      const { data, error } = await supabase.auth.resetPasswordForEmail(values.email, {
+        redirectTo: `${window.location.origin}/update-password`,
+      });
+
+      if (error) {
+        toast.error(error.message || "Erro ao enviar email de recuperação.");
+        console.error("Error sending password reset email:", error);
+      } else {
+        toast.success("Email de recuperação enviado! Verifique sua caixa de entrada.");
+        // Do not navigate immediately, user needs to check email.
+        // Optionally, you could clear the form or redirect after a delay,
+        // but typically user stays on page or is informed to check email.
+        form.reset(); // Clear the form on success
+      }
+    } catch (error: any) {
+      toast.error("Ocorreu um erro inesperado.");
+      console.error("Unexpected error in handleSubmit:", error);
+    } finally {
       setIsLoading(false);
-      toast.success("Email de recuperação enviado! Verifique sua caixa de entrada.");
-      navigate("/login");
-    }, 1500);
+    }
   };
 
   return (
