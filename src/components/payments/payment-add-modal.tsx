@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,9 +13,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DollarSign } from "lucide-react";
 import { toast } from "sonner";
-<<<<<<< HEAD
-import { Tooltip, TooltipTrigger, TooltipContent }
-from "@/components/ui/tooltip";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import { supabase } from "@/integrations/supabase/client";
 
 export function PaymentAddModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [cardNumber, setCardNumber] = useState("");
@@ -24,88 +22,38 @@ export function PaymentAddModal({ open, onClose }: { open: boolean; onClose: () 
   const [expiry, setExpiry] = useState("");
   const [cvv, setCvv] = useState("");
   const [saving, setSaving] = useState(false);
-=======
-import { supabase } from "@/integrations/supabase/client"; // Import supabase
-
-export function PaymentAddModal() {
-  const [open, setOpen] = useState(false);
-  const [clientName, setClientName] = useState("");
-  const [service, setService] = useState("");
-  const [amount, setAmount] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState("credit");
-  const [isLoading, setIsLoading] = useState(false); // Add loading state
->>>>>>> ab7eed0437afa7e93ad5d147cb871cafd9e28691
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-<<<<<<< HEAD
     if (!cardNumber || !cardName || !expiry || !cvv) {
       toast.error("Por favor, preencha todos os campos do cartão.");
       return;
     }
+
     setSaving(true);
-    setTimeout(() => {
-      setSaving(false);
-      toast.success("Cartão adicionado com sucesso!");
-      setCardNumber("");
-      setCardName("");
-      setExpiry("");
-      setCvv("");
-      onClose();
-    }, 1200);
-=======
-    setIsLoading(true);
-
-    // Validation
-    if (!clientName || !service || !amount || !paymentMethod) {
-      toast.error("Por favor, preencha todos os campos");
-      setIsLoading(false);
-      return;
-    }
-
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        toast.error("Você precisa estar logado para registrar um pagamento.");
-        setIsLoading(false);
+        toast.error("Você precisa estar logado para adicionar um cartão.");
         return;
       }
-      const user_id = user.id;
-      // TODO: In a real application, fetch the actual barbershop_id based on the logged-in user's profile/role.
-      // For instance, if a user is an owner of a barbershop, their profile might link to a barbershops table.
-      const barbershop_id = 'mock_barbershop_id'; // Placeholder - replace with actual logic
 
-      const paymentData = {
-        client_name: clientName,
-        service_name: service,
-        amount: parseFloat(amount),
-        payment_method: paymentMethod,
-        user_id: user_id, // ID of the user who recorded the payment
-        barbershop_id: barbershop_id, // ID of the barbershop receiving payment
-        // created_at will be set by default by Supabase
-      };
-
-      const { error } = await supabase.from('payments').insert([paymentData]);
-
-      if (error) {
-        toast.error(error.message || "Erro ao registrar pagamento.");
-        console.error("Error inserting payment:", error);
-      } else {
-        toast.success("Pagamento registrado com sucesso!");
-        setOpen(false);
-        // Reset form
-        setClientName("");
-        setService("");
-        setAmount("");
-        setPaymentMethod("credit");
-      }
+      // TODO: Implementar a lógica de salvar o cartão no Supabase
+      // Por enquanto, apenas simula o salvamento
+      setTimeout(() => {
+        setSaving(false);
+        toast.success("Cartão adicionado com sucesso!");
+        setCardNumber("");
+        setCardName("");
+        setExpiry("");
+        setCvv("");
+        onClose();
+      }, 1200);
     } catch (error: any) {
-      toast.error("Ocorreu um erro inesperado.");
-      console.error("Unexpected error in handleSubmit:", error);
-    } finally {
-      setIsLoading(false);
+      toast.error("Ocorreu um erro ao salvar o cartão.");
+      console.error("Error saving card:", error);
+      setSaving(false);
     }
->>>>>>> ab7eed0437afa7e93ad5d147cb871cafd9e28691
   };
 
   return (
