@@ -1,9 +1,8 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { ReactNode } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -37,7 +36,6 @@ export function ClientLayout({ children }: ClientLayoutProps) {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [userName, setUserName] = useState<string>("");
-  const [avatarUrl, setAvatarUrl] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -49,22 +47,27 @@ export function ClientLayout({ children }: ClientLayoutProps) {
           navigate("/login");
           return;
         }
+
         // Buscar dados do perfil do usuário
-        const { data: profile } = await supabase
+        const { data: profile, error } = await supabase
           .from("profiles")
-          .select("first_name, last_name, avatar")
+          .select("email")
           .eq("id", session.user.id)
           .single();
+
+        if (error) {
+          console.error("Erro ao buscar perfil:", error);
+          setUserName(session.user.email?.split("@")[0] || "Usuário");
+          return;
+        }
+
         if (profile) {
-          const firstName = profile.firstName || "";
-          const lastName = profile.lastName || "";
-          const fullName = `${firstName} ${lastName}`.trim();
-          setUserName(fullName ? fullName : session.user.email.split("@")[0]);
-          setAvatarUrl(profile.avatar || "");
+          setUserName(profile.email?.split("@")[0] || "Usuário");
         } else {
-          setUserName(session.user.email.split("@")[0]);
+          setUserName(session.user.email?.split("@")[0] || "Usuário");
         }
       } catch (error) {
+        console.error("Erro na autenticação:", error);
         toast.error("Sessão expirada. Faça login novamente.");
         navigate("/login");
       } finally {
@@ -81,6 +84,7 @@ export function ClientLayout({ children }: ClientLayoutProps) {
       </div>
     );
   }
+
   const menuItems = [
     { name: "Início", path: "/cliente", icon: <Home /> },
     { name: "Barbearias", path: "/cliente/barbearias", icon: <Scissors /> },
@@ -115,13 +119,21 @@ export function ClientLayout({ children }: ClientLayoutProps) {
     </>
   );
 
+  const UserAvatar = () => (
+    <Avatar className="h-8 w-8">
+      <AvatarFallback className="bg-barber-gold">
+        {userName ? userName.substring(0,2).toUpperCase() : "US"}
+      </AvatarFallback>
+    </Avatar>
+  );
+
   return (
     <div className="flex min-h-screen flex-col">
-      {/* Header mobile */}
+      {/* Header */}
       <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b bg-background px-4 lg:px-6">
         <div className="flex items-center gap-2">
           <Sheet open={open} onOpenChange={setOpen}>
-            <SheetTrigger asChild className="lg:hidden">
+            <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="lg:hidden">
                 <Menu />
                 <span className="sr-only">Toggle Menu</span>
@@ -141,6 +153,7 @@ export function ClientLayout({ children }: ClientLayoutProps) {
               </nav>
             </SheetContent>
           </Sheet>
+
           <Link to="/cliente" className="flex items-center gap-2">
             <span className="text-xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-barber-gold to-yellow-400">
               ShearHub
@@ -148,39 +161,35 @@ export function ClientLayout({ children }: ClientLayoutProps) {
           </Link>
         </div>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-              <Avatar className="h-8 w-8">
-                <AvatarImage src={avatarUrl} alt="Avatar" />
-                <AvatarFallback className="bg-barber-gold">
-                  {userName ? userName.substring(0,2).toUpperCase() : "US"}
-                </AvatarFallback>
-              </Avatar>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56" align="end" forceMount>
-            <DropdownMenuLabel className="font-normal">
-              <div className="flex flex-col space-y-1 items-center">
-                <Avatar className="w-16 h-16 mb-2">
-                  <AvatarImage src={avatarUrl} alt="Avatar" />
-                  <AvatarFallback className="bg-barber-gold text-2xl">
-                    {userName ? userName.substring(0,2).toUpperCase() : "US"}
-                  </AvatarFallback>
-                </Avatar>
-                <p className="text-sm font-medium leading-none">{userName}</p>
-              </div>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link to="/cliente/perfil">Meu Perfil</Link>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleLogout} className="text-destructive">
-              <LogOut className="mr-2 h-4 w-4" /> Sair
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="flex items-center gap-4">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                <UserAvatar />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56" align="end" forceMount>
+              <DropdownMenuLabel className="font-normal">
+                <div className="flex flex-col space-y-1 items-center">
+                  <Avatar className="w-16 h-16 mb-2">
+                    <AvatarFallback className="bg-barber-gold text-2xl">
+                      {userName ? userName.substring(0,2).toUpperCase() : "US"}
+                    </AvatarFallback>
+                  </Avatar>
+                  <p className="text-sm font-medium leading-none">{userName}</p>
+                </div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <Link to="/cliente/perfil">Meu Perfil</Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleLogout} className="text-destructive">
+                <LogOut className="mr-2 h-4 w-4" /> Sair
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </header>
 
       {/* Sidebar e conteúdo principal */}
@@ -188,12 +197,7 @@ export function ClientLayout({ children }: ClientLayoutProps) {
         {/* Sidebar fixa para desktop */}
         <aside className="hidden lg:flex flex-col w-64 bg-barber-black text-white border-r border-barber-gray min-h-[calc(100vh-4rem)]">
           <div className="flex items-center gap-2 px-6 py-6 border-b border-barber-gray">
-            <Avatar className="h-10 w-10">
-              <AvatarImage src={avatarUrl} alt="Avatar" />
-              <AvatarFallback className="bg-barber-gold">
-                {userName ? userName.substring(0,2).toUpperCase() : "US"}
-              </AvatarFallback>
-            </Avatar>
+            <UserAvatar />
             <div className="ml-3">
               <div className="font-semibold text-lg text-barber-gold">{userName}</div>
               <div className="text-xs text-muted-foreground">Cliente</div>
@@ -213,6 +217,7 @@ export function ClientLayout({ children }: ClientLayoutProps) {
             </Button>
           </div>
         </aside>
+
         {/* Conteúdo principal */}
         <main className="flex-1 h-[calc(100vh-4rem)] overflow-auto bg-background">
           <ScrollArea className="h-full">

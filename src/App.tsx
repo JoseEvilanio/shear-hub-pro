@@ -1,9 +1,8 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SuperUserProvider } from "@/contexts/SuperUserContext";
 import { lazy, Suspense } from "react";
@@ -33,8 +32,29 @@ import AdminNotifications from "./pages/admin/AdminNotifications";
 import AdminSettings from "./pages/admin/AdminSettings";
 import SuperUserManager from "./pages/admin/SuperUserManager";
 
+// Lazy load client pages
+const ClientHome = lazy(() => import("@/pages/cliente/ClientHome"));
+const ClientBarberShops = lazy(() => import("@/pages/cliente/ClientBarberShops"));
+const ClientBarberShopDetail = lazy(() => import("@/pages/cliente/ClientBarberShopDetail"));
+const ClientAppointments = lazy(() => import("@/pages/cliente/ClientAppointments"));
+const ClientPayments = lazy(() => import("@/pages/cliente/ClientPayments"));
+const ClientProfile = lazy(() => import("@/pages/cliente/ClientProfile"));
+const ClientBookingForm = lazy(() => import("@/pages/cliente/ClientBookingForm"));
+const ClientLoyalty = lazy(() => import("@/pages/cliente/ClientLoyalty"));
+
 // Create a client
 const queryClient = new QueryClient();
+
+// Layout wrapper para as rotas do cliente
+const ClientLayoutWrapper = () => {
+  return (
+    <ClientLayout>
+      <Suspense fallback={<div>Carregando...</div>}>
+        <Outlet />
+      </Suspense>
+    </ClientLayout>
+  );
+};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -58,25 +78,30 @@ const App = () => (
               <Route path="/dashboard/pagamentos" element={<Payments />} />
               <Route path="/dashboard/relatorios" element={<Reports />} />
               <Route path="/dashboard/configuracoes" element={<Settings />} />
-              {/* Rotas do Cliente */}
-              <Route path="/cliente" element={<ClientLayout><Suspense fallback={<div>Carregando...</div>}><ClientHome /></Suspense></ClientLayout>} />
-              <Route path="/cliente/barbearias" element={<ClientLayout><Suspense fallback={<div>Carregando...</div>}><ClientBarberShops /></Suspense></ClientLayout>} />
-              <Route path="/cliente/barbearia/:id" element={<ClientLayout><Suspense fallback={<div>Carregando...</div>}><ClientBarberShopDetail /></Suspense></ClientLayout>} />
-              <Route path="/cliente/agendamentos" element={<ClientLayout><Suspense fallback={<div>Carregando...</div>}><ClientAppointments /></Suspense></ClientLayout>} />
-              <Route path="/cliente/fidelidade" element={<ClientLayout><Suspense fallback={<div>Carregando...</div>}><ClientLoyalty /></Suspense></ClientLayout>} />
-              <Route path="/cliente/pagamentos" element={<ClientLayout><Suspense fallback={<div>Carregando...</div>}><ClientPayments /></Suspense></ClientLayout>} />
-              <Route path="/cliente/perfil" element={<ClientLayout><Suspense fallback={<div>Carregando...</div>}><ClientProfile /></Suspense></ClientLayout>} />
-              <Route path="/cliente/agendar/:id" element={<ClientLayout><Suspense fallback={<div>Carregando...</div>}><ClientBookingForm /></Suspense></ClientLayout>} />
-              {/* Superuser Admin routes */}
-              <Route path="/admin" element={<AdminDashboard />} />
-              <Route path="/admin/barbearias" element={<AdminBarbershops />} />
-              <Route path="/admin/usuarios" element={<AdminUsers />} />
-              <Route path="/admin/pagamentos" element={<AdminPayments />} />
-              <Route path="/admin/relatorios" element={<AdminReports />} />
-              <Route path="/admin/notificacoes" element={<AdminNotifications />} />
-              <Route path="/admin/configuracoes" element={<AdminSettings />} />
-              <Route path="/admin/superusers" element={<SuperUserManager />} />
               
+              {/* Rotas do Cliente */}
+              <Route element={<ClientLayoutWrapper />}>
+                <Route path="/cliente" element={<ClientHome />} />
+                <Route path="/cliente/barbearias" element={<ClientBarberShops />} />
+                <Route path="/cliente/barbearia/:id" element={<ClientBarberShopDetail />} />
+                <Route path="/cliente/agendamentos" element={<ClientAppointments />} />
+                <Route path="/cliente/fidelidade" element={<ClientLoyalty />} />
+                <Route path="/cliente/pagamentos" element={<ClientPayments />} />
+                <Route path="/cliente/perfil" element={<ClientProfile />} />
+                <Route path="/cliente/agenda/:id" element={<ClientBookingForm />} />
+              </Route>
+
+              {/* Rotas do Admin */}
+              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/admin/barbershops" element={<AdminBarbershops />} />
+              <Route path="/admin/users" element={<AdminUsers />} />
+              <Route path="/admin/payments" element={<AdminPayments />} />
+              <Route path="/admin/reports" element={<AdminReports />} />
+              <Route path="/admin/notifications" element={<AdminNotifications />} />
+              <Route path="/admin/settings" element={<AdminSettings />} />
+              <Route path="/admin/superuser" element={<SuperUserManager />} />
+
+              {/* Rota 404 */}
               <Route path="*" element={<NotFound />} />
             </Routes>
           </SuperUserProvider>
@@ -87,13 +112,3 @@ const App = () => (
 );
 
 export default App;
-
-// Lazy load das páginas do cliente
-const ClientHome = lazy(() => import("./pages/cliente/ClientHome"));
-const ClientBarberShops = lazy(() => import("./pages/cliente/ClientBarberShops"));
-const ClientBarberShopDetail = lazy(() => import("./pages/cliente/ClientBarberShopDetail"));
-const ClientAppointments = lazy(() => import("./pages/cliente/ClientAppointments"));
-const ClientLoyalty = lazy(() => import("./pages/cliente/ClientLoyalty"));
-const ClientPayments = lazy(() => import("./pages/cliente/ClientPayments"));
-const ClientProfile = lazy(() => import("./pages/cliente/ClientProfile"));
-const ClientBookingForm = lazy(() => import("./pages/cliente/ClientBookingForm"));
