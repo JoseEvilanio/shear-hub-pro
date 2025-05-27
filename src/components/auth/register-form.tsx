@@ -59,12 +59,12 @@ export function RegisterForm() {
       }
 
       toast.success("Conta criada com sucesso!");
-      await supabase.auth.signOut();
-      // Redirect to client area if client, login if barbershop
+      // await supabase.auth.signOut(); // User should remain signed in
+      // Redirect to client area if client, dashboard if owner
       if (userType === "cliente") {
         navigate("/cliente");
-      } else {
-        navigate("/login");
+      } else { // userType === "proprietario"
+        navigate("/dashboard"); // Redirect owner to dashboard
       }
     } catch (error: any) {
       toast.error(error.message || "Erro ao criar conta");
@@ -74,15 +74,32 @@ export function RegisterForm() {
     }
   };
 
-  const handleSocialRegister = (provider: string) => {
+  const handleSocialRegister = async (provider: 'google' | 'facebook') => {
     setIsLoading(true);
-    
-    // Simulando login social
-    setTimeout(() => {
+    try {
+      const role = userType === "cliente" ? "client" : "owner";
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          data: {
+            role: role, // Store the intended role
+          },
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+
+      if (error) {
+        toast.error(`Erro ao registrar com ${provider}: ${error.message}`);
+        console.error(`Error during ${provider} OAuth sign-in:`, error);
+        setIsLoading(false);
+      }
+      // If successful, Supabase handles the redirect. setIsLoading(false) might not be reached
+      // if redirection is immediate, but it's good for error cases.
+    } catch (error: any) {
+      toast.error(`Um erro inesperado ocorreu: ${error.message}`);
+      console.error("Unexpected error during social registration:", error);
       setIsLoading(false);
-      toast.success(`Conta criada com ${provider} com sucesso!`);
-      navigate(userType === "proprietario" ? "/dashboard" : "/cliente");
-    }, 1500);
+    }
   };
 
   return (

@@ -4,27 +4,94 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BanknoteIcon, CreditCard, DollarSign, FileText, Filter, Search } from "lucide-react";
+import { BanknoteIcon, CreditCard, DollarSign, FileText, Filter, Search, Loader2 } from "lucide-react"; // Added Loader2
 import { Input } from "@/components/ui/input";
-import { mockPayments } from "@/data/mock-payments";
-import { useState } from "react";
+// import { mockPayments } from "@/data/mock-payments"; // Remove mock data
+import { useState, useEffect } from "react"; // Import useEffect
 import { PaymentAddModal } from "@/components/payments/payment-add-modal";
 import { PaymentReportModal } from "@/components/payments/payment-report-modal";
+import { supabase } from "@/integrations/supabase/client"; // Import supabase
+import { toast } from "sonner"; // For error notifications
+
+// Define an interface for the payment data
+interface Payment {
+  id: string; // Assuming ID is a string from Supabase (e.g., UUID or auto-incremented int displayed as string)
+  created_at: string; // Supabase TIMESTAMPTZ will be a string
+  client_name: string;
+  service_name: string;
+  payment_method: string;
+  amount: number;
+  status: 'paid' | 'pending' | string; // Allow string for flexibility if other statuses exist
+  // user_id: string; // If needed for other logic, but fetched by user_id already
+  // barbershop_id: string; // If needed for other logic
+}
 
 const Payments = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [payments, setPayments] = useState<Payment[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPayments = async () => {
+      setIsLoading(true);
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          toast.error("Usuário não autenticado.");
+          setIsLoading(false);
+          return;
+        }
+
+        // Fetch payments associated with the user's barbershop.
+        // This assumes payments are linked via user_id of the recorder (owner)
+        // or a barbershop_id linked to that user. For this example, using user_id.
+        // TODO: Adjust if payments should be fetched via a barbershop_id that's not directly user.id
+        const { data, error } = await supabase
+          .from('payments')
+          .select('*')
+          .eq('user_id', user.id) // Assuming payments are associated with the user who created them
+          .order('created_at', { ascending: false });
+
+        if (error) {
+          toast.error(error.message || "Erro ao buscar pagamentos.");
+          console.error("Error fetching payments:", error);
+          setPayments([]);
+        } else {
+          setPayments(data as Payment[]);
+        }
+      } catch (error: any) {
+        toast.error("Ocorreu um erro inesperado ao buscar pagamentos.");
+        console.error("Unexpected error fetching payments:", error);
+        setPayments([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPayments();
+  }, []);
 
   // Calculate summary metrics
-  const totalRevenue = mockPayments.reduce((acc, payment) => acc + payment.amount, 0);
-  const totalPaid = mockPayments.filter(p => p.status === "paid").reduce((acc, p) => acc + p.amount, 0);
-  const totalPending = mockPayments.filter(p => p.status === "pending").reduce((acc, p) => acc + p.amount, 0);
+  const totalRevenue = payments.reduce((acc, payment) => acc + payment.amount, 0);
+  const totalPaid = payments.filter(p => p.status === "paid").reduce((acc, p) => acc + p.amount, 0);
+  const totalPending = payments.filter(p => p.status === "pending").reduce((acc, p) => acc + p.amount, 0);
 
   // Filter payments based on search
-  const filteredPayments = mockPayments.filter(payment =>
-    payment.id.toString().includes(searchTerm) ||
-    payment.client.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    payment.service.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredPayments = payments.filter(payment =>
+    payment.id.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
+    payment.client_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    payment.service_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+  
+  if (isLoading) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center h-[calc(100vh-150px)]">
+          <Loader2 className="h-16 w-16 animate-spin text-barber-gold" />
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>
@@ -133,7 +200,7 @@ const PaymentsTable = ({ payments }: { payments: any[] }) => {
         <TableHeader>
           <TableRow>
             <TableHead>ID</TableHead>
-            <TableHead>Data</TableHead>
+            <TableHead>Data</TableHead> {/* Will display full timestamp, formatting needed */}
             <TableHead>Cliente</TableHead>
             <TableHead>Serviço</TableHead>
             <TableHead>Método</TableHead>
@@ -153,17 +220,22 @@ const PaymentsTable = ({ payments }: { payments: any[] }) => {
             payments.map((payment) => (
               <TableRow key={payment.id}>
                 <TableCell className="font-medium">{payment.id}</TableCell>
-                <TableCell>{payment.date}</TableCell>
-                <TableCell>{payment.client}</TableCell>
-                <TableCell>{payment.service}</TableCell>
+                <TableCell>{new Date(payment.created_at).toLocaleDateString()}</TableCell> {/* Basic date formatting */}
+                <TableCell>{payment.client_name}</TableCell>
+                <TableCell>{payment.service_name}</TableCell>
                 <TableCell>
                   <div className="flex items-center">
-                    {payment.method === "credit" && <CreditCard className="h-4 w-4 mr-2" />}
-                    {payment.method === "cash" && <BanknoteIcon className="h-4 w-4 mr-2" />}
-                    {payment.method === "credit" ? "Cartão de Crédito" : "Dinheiro"}
+                    {payment.payment_method === "credit" && <CreditCard className="h-4 w-4 mr-2 text-blue-500" />}
+                    {payment.payment_method === "cash" && <BanknoteIcon className="h-4 w-4 mr-2 text-green-500" />}
+                    {payment.payment_method === "pix" && <DollarSign className="h-4 w-4 mr-2 text-emerald-500" />} {/* Assuming PIX icon */}
+                    {payment.payment_method === "debit" && <CreditCard className="h-4 w-4 mr-2 text-purple-500" />}
+                    {payment.payment_method === "credit" ? "Cartão de Crédito" : 
+                     payment.payment_method === "cash" ? "Dinheiro" :
+                     payment.payment_method === "pix" ? "PIX" :
+                     payment.payment_method === "debit" ? "Cartão de Débito" : payment.payment_method}
                   </div>
                 </TableCell>
-                <TableCell>R$ {payment.amount.toFixed(2)}</TableCell>
+                <TableCell>R$ {Number(payment.amount).toFixed(2)}</TableCell> {/* Ensure amount is number */}
                 <TableCell>
                   <div className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
                     payment.status === "paid" 
