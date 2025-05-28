@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -10,7 +9,6 @@ import { Plus, Pencil, Trash2, Clock, Loader2 } from "lucide-react"; // Added Lo
 import { ServiceAddModal } from "@/components/services/service-add-modal";
 import { ServiceEditModal } from "@/components/services/service-edit-modal";
 import { supabase } from "@/integrations/supabase/client"; // Import supabase
-import { useState, useEffect } from "react"; // Import useEffect
 import { toast } from "sonner"; // For error notifications
 import {
   AlertDialog,
