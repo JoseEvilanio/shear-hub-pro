@@ -152,7 +152,7 @@ const ClientAppointments = () => {
   // Função para reagendar
   const handleRescheduleAppointment = (id: number) => {
     // Em um app real, navegaria para a página de agendamento com os dados pré-preenchidos
-    navigate(`/cliente/agendar/1?reschedule=${id}`);
+    navigate(`/cliente/agenda/${id}`);
   };
   
   // Filtrar agendamentos de acordo com a tab selecionada

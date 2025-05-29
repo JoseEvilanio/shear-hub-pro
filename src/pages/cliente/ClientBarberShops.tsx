@@ -307,7 +307,7 @@ const ClientBarberShops = () => {
                               className="bg-barber-gold hover:bg-barber-gold/90"
                               asChild
                             >
-                              <Link to={`/cliente/agendar/${shop.id}`}>
+                              <Link to={`/cliente/agenda/${shop.id}`}>
                                 Agendar
                               </Link>
                             </Button>

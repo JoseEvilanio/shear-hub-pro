@@ -7,6 +7,38 @@ import { Button } from "@/components/ui/button";
 import { Upload } from "lucide-react";
 import React from "react";
 
+const formatPhoneNumber = (value: string) => {
+  let formattedValue = value.replace(/\D/g, ''); // Remove all non-digit characters
+
+  if (formattedValue.length > 11) {
+    formattedValue = formattedValue.substring(0, 11); // Limit to 11 digits
+  }
+
+  if (formattedValue.length > 7) {
+    formattedValue = formattedValue.replace(/^(\d{2})(\d{5})(\d{0,4}).*/, '($1) $2-$3');
+  } else if (formattedValue.length > 2) {
+    formattedValue = formattedValue.replace(/^(\d{2})(\d{0,5}).*/, '($1) $2');
+  }
+
+  return formattedValue;
+};
+
+const formatDate = (value: string) => {
+  let formattedValue = value.replace(/\D/g, ''); // Remove all non-digit characters
+
+  if (formattedValue.length > 8) {
+    formattedValue = formattedValue.substring(0, 8); // Limit to 8 digits (DDMMYYYY)
+  }
+
+  if (formattedValue.length > 4) {
+    formattedValue = formattedValue.replace(/^(\d{2})(\d{2})(\d{0,4}).*/, '$1/$2/$3');
+  } else if (formattedValue.length > 2) {
+    formattedValue = formattedValue.replace(/^(\d{2})(\d{0,2}).*/, '$1/$2');
+  }
+
+  return formattedValue;
+};
+
 interface PersonalDataFormProps {
   userData: any;
   setUserData: (data: any) => void;
@@ -65,11 +97,10 @@ export const PersonalDataForm: React.FC<PersonalDataFormProps> = ({ userData, se
             <Label htmlFor="phone">Telefone</Label>
             <Input
               id="phone"
-              value={userData.phone}
-              onChange={(e) => setUserData({...userData, phone: e.target.value})}
+              value={formatPhoneNumber(userData.phone)}
+              onChange={(e) => setUserData({...userData, phone: formatPhoneNumber(e.target.value)})}
               disabled={!isEditing}
               required
-              pattern="\(\d{2}\) \d{4,5}-\d{4}"
               placeholder="(11) 99999-9999"
             />
           </div>
@@ -77,11 +108,12 @@ export const PersonalDataForm: React.FC<PersonalDataFormProps> = ({ userData, se
             <Label htmlFor="birthDate">Data de Nascimento</Label>
             <Input
               id="birthDate"
-              type="date"
+              type="text"
               value={userData.birthDate}
-              onChange={(e) => setUserData({...userData, birthDate: e.target.value})}
+              onChange={(e) => setUserData({...userData, birthDate: formatDate(e.target.value)})} // Apply formatting on change
               disabled={!isEditing}
               required
+              placeholder="DD/MM/AAAA"
             />
           </div>
           <div className="space-y-2">
