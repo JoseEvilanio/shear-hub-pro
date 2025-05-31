@@ -96,9 +96,9 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import Barbearias from "./pages/admin/Barbearias";
 import Usuarios from "./pages/admin/Usuarios";
 import Pagamentos from "./pages/admin/Pagamentos";
-import AdminReports from "./pages/admin/AdminReports";
-import AdminNotifications from "./pages/admin/AdminNotifications";
-import AdminSettings from "./pages/admin/AdminSettings";
+import Relatorios from "./pages/admin/Relatorios";
+import Notificacoes from "./pages/admin/Notificacoes";
+import Configuracoes from "./pages/admin/Configuracoes";
 import Superusuarios from "./pages/admin/Superusuarios";
 
 // Páginas cliente com lazy load
@@ -169,9 +169,9 @@ const App = () => (
               <Route path="/admin/barbearias" element={<Barbearias />} />
               <Route path="/admin/usuarios" element={<Usuarios />} />
               <Route path="/admin/pagamentos" element={<Pagamentos />} />
-              <Route path="/admin/reports" element={<AdminReports />} />
-              <Route path="/admin/notifications" element={<AdminNotifications />} />
-              <Route path="/admin/settings" element={<AdminSettings />} />
+              <Route path="/admin/relatorios" element={<Relatorios />} />
+              <Route path="/admin/notificacoes" element={<Notificacoes />} />
+              <Route path="/admin/configuracoes" element={<Configuracoes />} />
               <Route path="/admin/superusuarios" element={<Superusuarios />} />
               <Route path="/proprietario" element={<ProprietarioDashboard />} />
 
