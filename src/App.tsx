@@ -1,12 +1,79 @@
+import { useEffect, lazy, Suspense } from "react";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+  Outlet,
+  useNavigate,
+} from "react-router-dom";
+
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SuperUserProvider } from "@/contexts/SuperUserContext";
-import { lazy, Suspense } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import ProprietarioDashboard from "./pages/ProprietarioDashboard";
 
+// AuthCallback component
+const AuthCallback = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkRoleAndRedirect = async () => {
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+
+      if (userError || !user) {
+        navigate('/login');
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+      if (error || !data) {
+        console.error('Erro ao buscar o role:', error);
+        navigate('/login');
+        return;
+      }
+
+      const role = data.role;
+
+      switch (role) {
+        case 'client':
+          navigate('/cliente');
+          break;
+        case 'owner':
+          navigate('/dashboard'); // <-- Correção feita aqui
+          break;
+        case 'admin':
+          navigate('/admin');
+          break;
+        default:
+          navigate('/login');
+      }
+    };
+
+    checkRoleAndRedirect();
+  }, [navigate]);
+
+  return (
+    <div>
+      <p>Redirecionando...</p>
+    </div>
+  );
+};
+
+
+// Páginas comuns
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ForgotPassword from "./pages/ForgotPassword";
@@ -20,19 +87,21 @@ import Payments from "./pages/Payments";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
+
+// Layout cliente
 import { ClientLayout } from "@/components/layout/client-layout";
 
-// Superuser Admin pages
+// Páginas admin
 import AdminDashboard from "./pages/admin/AdminDashboard";
-import AdminBarbershops from "./pages/admin/AdminBarbershops";
-import AdminUsers from "./pages/admin/AdminUsers";
-import AdminPayments from "./pages/admin/AdminPayments";
+import Barbearias from "./pages/admin/Barbearias";
+import Usuarios from "./pages/admin/Usuarios";
+import Pagamentos from "./pages/admin/Pagamentos";
 import AdminReports from "./pages/admin/AdminReports";
 import AdminNotifications from "./pages/admin/AdminNotifications";
 import AdminSettings from "./pages/admin/AdminSettings";
-import SuperUserManager from "./pages/admin/SuperUserManager";
+import Superusuarios from "./pages/admin/Superusuarios";
 
-// Lazy load client pages
+// Páginas cliente com lazy load
 const ClientHome = lazy(() => import("@/pages/cliente/ClientHome"));
 const ClientBarberShops = lazy(() => import("@/pages/cliente/ClientBarberShops"));
 const ClientBarberShopDetail = lazy(() => import("@/pages/cliente/ClientBarberShopDetail"));
@@ -42,10 +111,10 @@ const ClientProfile = lazy(() => import("@/pages/cliente/ClientProfile"));
 const ClientBookingForm = lazy(() => import("@/pages/cliente/ClientBookingForm"));
 const ClientLoyalty = lazy(() => import("@/pages/cliente/ClientLoyalty"));
 
-// Create a client
+// Query Client
 const queryClient = new QueryClient();
 
-// Layout wrapper para as rotas do cliente
+// Wrapper layout cliente
 const ClientLayoutWrapper = () => {
   return (
     <ClientLayout>
@@ -56,6 +125,7 @@ const ClientLayoutWrapper = () => {
   );
 };
 
+// Componente App
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider defaultTheme="dark">
@@ -69,6 +139,9 @@ const App = () => (
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/auth/callback" element={<AuthCallback />} />
+
+              {/* Dashboard (owner) */}
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/dashboard/agendamentos" element={<Appointments />} />
               <Route path="/dashboard/barbeiros" element={<Barbers />} />
@@ -78,8 +151,8 @@ const App = () => (
               <Route path="/dashboard/pagamentos" element={<Payments />} />
               <Route path="/dashboard/relatorios" element={<Reports />} />
               <Route path="/dashboard/configuracoes" element={<Settings />} />
-              
-              {/* Rotas do Cliente */}
+
+              {/* Rotas do Cliente com layout */}
               <Route element={<ClientLayoutWrapper />}>
                 <Route path="/cliente" element={<ClientHome />} />
                 <Route path="/cliente/barbearias" element={<ClientBarberShops />} />
@@ -93,15 +166,16 @@ const App = () => (
 
               {/* Rotas do Admin */}
               <Route path="/admin" element={<AdminDashboard />} />
-              <Route path="/admin/barbershops" element={<AdminBarbershops />} />
-              <Route path="/admin/users" element={<AdminUsers />} />
-              <Route path="/admin/payments" element={<AdminPayments />} />
+              <Route path="/admin/barbearias" element={<Barbearias />} />
+              <Route path="/admin/usuarios" element={<Usuarios />} />
+              <Route path="/admin/pagamentos" element={<Pagamentos />} />
               <Route path="/admin/reports" element={<AdminReports />} />
               <Route path="/admin/notifications" element={<AdminNotifications />} />
               <Route path="/admin/settings" element={<AdminSettings />} />
-              <Route path="/admin/superuser" element={<SuperUserManager />} />
+              <Route path="/admin/superusuarios" element={<Superusuarios />} />
+              <Route path="/proprietario" element={<ProprietarioDashboard />} />
 
-              {/* Rota 404 */}
+              {/* Página 404 */}
               <Route path="*" element={<NotFound />} />
             </Routes>
           </SuperUserProvider>

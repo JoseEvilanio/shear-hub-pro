@@ -17,8 +17,19 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+
 export function SidebarMenu() {
   const [collapsed, setCollapsed] = useState(false);
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    toast.success("Você saiu da sua conta");
+    navigate("/login");
+  };
 
   const menuItems = [
     { icon: Home, label: "Dashboard", href: "/dashboard" },
@@ -80,6 +91,7 @@ export function SidebarMenu() {
           variant="ghost" 
           size="icon"
           className={cn("text-white hover:bg-barber-gray", collapsed && "mx-auto")}
+          onClick={handleLogout}
         >
           <LogOut size={18} />
         </Button>

@@ -61,5 +61,14 @@ export const usersAdminApi = {
     });
     
     return usersWithStats;
+  },
+  async updateUserRole(userId: string, newRole: 'client' | 'barber' | 'owner' | 'admin' | 'superuser') {
+    const { error } = await supabase
+      .from('profiles')
+      .update({ role: newRole })
+      .eq('id', userId);
+    if (error) {
+      throw new Error('Erro ao atualizar o papel do usuário: ' + error.message);
+    }
   }
 };

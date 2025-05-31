@@ -38,19 +38,24 @@ export function RegisterForm() {
     try {
       // Define o tipo de usuário baseado na seleção
       const role = userType === "cliente" ? "client" : "owner";
-      const [firstName, ...lastNameParts] = values.name.split(' ');
-      const lastName = lastNameParts.join(' ');
+      let userData: { [key: string]: any } = { role: role };
+
+      if (userType === "cliente") {
+        const [firstName, ...lastNameParts] = values.name.split(' ');
+        const lastName = lastNameParts.join(' ');
+        userData.first_name = firstName;
+        userData.last_name = lastName || '';
+      } else { // proprietario
+        userData.first_name = values.name; // Store the full name for owners (barbershop name)
+        userData.last_name = '';
+      }
       
       // Register the user with Supabase
       const { data, error } = await supabase.auth.signUp({
         email: values.email,
         password: values.password,
         options: {
-          data: {
-            first_name: firstName,
-            last_name: lastName || '',
-            role: role, // Armazena a função do usuário nos metadados
-          }
+          data: { ...userData, role: role },
         }
       });
 
@@ -58,14 +63,14 @@ export function RegisterForm() {
         throw error;
       }
 
-      toast.success("Conta criada com sucesso!");
-      // await supabase.auth.signOut(); // User should remain signed in
-      // Redirect to client area if client, dashboard if owner
-      if (userType === "cliente") {
-        navigate("/cliente");
-      } else { // userType === "proprietario"
-        navigate("/dashboard"); // Redirect owner to dashboard
-      }
+      toast.success("Verifique seu e-mail para confirmar o cadastro.");
+      // Aguarda confirmação do e-mail antes de criar perfil
+      // Não cria perfil no banco antes da confirmação
+      // Redireciona para tela de login
+      navigate("/login");
+      // Redireciona para área correta após login
+      // Se necessário, ajuste o fluxo pós-login para garantir que o proprietário vá para /proprietario
+
     } catch (error: any) {
       toast.error(error.message || "Erro ao criar conta");
       console.error("Erro de registro:", error);
@@ -78,12 +83,16 @@ export function RegisterForm() {
     setIsLoading(true);
     try {
       const role = userType === "cliente" ? "client" : "owner";
+      let userData: { [key: string]: any } = { role: role };
+
+      // For social logins, we might not have name details upfront, but we can still pass the role.
+      // If Supabase allows updating user metadata after initial sign-up, we can handle name parsing later.
+      // For now, ensure the role is passed.
+
+      localStorage.setItem('intendedRole', role);
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          data: {
-            role: role, // Store the intended role
-          },
           redirectTo: `${window.location.origin}/auth/callback`,
         },
       });
@@ -246,7 +255,7 @@ export function RegisterForm() {
       <Button 
         variant="outline" 
         className="w-full"
-        onClick={() => handleSocialRegister("Facebook")}
+        onClick={() => handleSocialRegister("facebook")}
         disabled={isLoading}
       >
         <Facebook className="mr-2 h-4 w-4" />
@@ -256,7 +265,7 @@ export function RegisterForm() {
       <Button 
         variant="outline" 
         className="w-full mt-2"
-        onClick={() => handleSocialRegister("Google")}
+        onClick={() => handleSocialRegister("google")}
         disabled={isLoading}
       >
         <svg

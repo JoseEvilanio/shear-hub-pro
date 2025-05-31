@@ -21,12 +21,16 @@ import {
   DialogTrigger 
 } from "@/components/ui/dialog";
 import { useState } from "react";
+import { usersAdminApi } from '@/services/admin/users-api';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { toast } from "sonner";
 
 interface UsersTableProps {
   users: UserStats[];
+  onRoleChanged?: () => void;
 }
 
-export function UsersTable({ users }: UsersTableProps) {
+export function UsersTable({ users, onRoleChanged }: UsersTableProps) {
   const [selectedUser, setSelectedUser] = useState<UserStats | null>(null);
   
   const getRoleBadge = (role: string) => {
@@ -48,6 +52,16 @@ export function UsersTable({ users }: UsersTableProps) {
 
   const getInitials = (firstName: string, lastName?: string) => {
     return `${firstName?.[0] || ''}${lastName?.[0] || ''}`.toUpperCase();
+  };
+  
+  const handleRoleChange = async (userId: string, newRole: UserStats['role']) => {
+    try {
+      await usersAdminApi.updateUserRole(userId, newRole);
+      toast.success('Papel do usuário atualizado com sucesso!');
+      if (onRoleChanged) onRoleChanged();
+    } catch (error: any) {
+      toast.error(error.message || 'Erro ao atualizar papel do usuário');
+    }
   };
   
   return (
@@ -125,7 +139,20 @@ export function UsersTable({ users }: UsersTableProps) {
                             </div>
                             <div>
                               <p className="text-sm font-medium">Tipo de usuário:</p>
-                              <p>{getRoleBadge(selectedUser.role)}</p>
+                              <Select value={selectedUser.role} onValueChange={(value) => handleRoleChange(selectedUser.id, value as UserStats['role'])}>
+                                <SelectTrigger className="w-full">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectGroup>
+                                    <SelectItem value="client">Cliente</SelectItem>
+                                    <SelectItem value="barber">Barbeiro</SelectItem>
+                                    <SelectItem value="owner">Proprietário</SelectItem>
+                                    <SelectItem value="admin">Administrador</SelectItem>
+                                    <SelectItem value="superuser">Super Admin</SelectItem>
+                                  </SelectGroup>
+                                </SelectContent>
+                              </Select>
                             </div>
                             <div>
                               <p className="text-sm font-medium">Data de cadastro:</p>
