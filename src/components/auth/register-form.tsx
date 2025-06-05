@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -8,14 +7,28 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Facebook, UserPlus } from "lucide-react";
+import { Facebook } from "lucide-react";
+import { FcGoogle } from 'react-icons/fc';
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
 const registerSchema = z.object({
   name: z.string().min(3, { message: "Nome deve ter pelo menos 3 caracteres" }),
   email: z.string().email({ message: "Email inválido" }),
-  password: z.string().min(6, { message: "Senha deve ter pelo menos 6 caracteres" }),
+  password: z.string()
+    .min(8, "Senha deve ter no mínimo 8 caracteres")
+    .regex(/[A-Z]/, "Deve conter uma letra maiúscula")
+    .regex(/[a-z]/, "Deve conter uma letra minúscula")
+    .regex(/[0-9]/, "Deve conter um número")
+    .regex(/[\W_]/, "Deve conter um caractere especial"),
+  password_confirmation: z.string(),
+  terms: z.boolean().refine(val => val === true, {
+    message: "Você precisa aceitar os termos de uso"
+  })
+}).refine((data) => data.password === data.password_confirmation, {
+  path: ["password_confirmation"],
+  message: "Confirmação de senha não confere"
 });
 
 export function RegisterForm() {
@@ -29,71 +42,108 @@ export function RegisterForm() {
       name: "",
       email: "",
       password: "",
+      password_confirmation: "",
+      terms: false
     },
   });
 
   const handleRegister = async (values: z.infer<typeof registerSchema>) => {
+    if (isLoading) return;
     setIsLoading(true);
     
     try {
-      // Define o tipo de usuário baseado na seleção
       const role = userType === "cliente" ? "client" : "owner";
-      let userData: { [key: string]: any } = { role: role };
-
-      if (userType === "cliente") {
-        const [firstName, ...lastNameParts] = values.name.split(' ');
-        const lastName = lastNameParts.join(' ');
-        userData.first_name = firstName;
-        userData.last_name = lastName || '';
-      } else { // proprietario
-        userData.first_name = values.name; // Store the full name for owners (barbershop name)
-        userData.last_name = '';
-      }
       
-      // Register the user with Supabase
-      const { data, error } = await supabase.auth.signUp({
+      console.log('Iniciando registro com:', {
+        email: values.email,
+        role
+      });
+
+      // Prepara os dados do nome
+      const fullName = values.name;
+      const first_name = userType === "cliente" ? fullName.split(' ')[0] : fullName;
+      const last_name = userType === "cliente" ? fullName.split(' ').slice(1).join(' ') : '';
+
+      // Registra o usuário no Supabase Auth com metadata
+      const { data: authData, error: authError } = await supabase.auth.signUp({
         email: values.email,
         password: values.password,
         options: {
-          data: { ...userData, role: role },
+          data: { 
+            role,
+            first_name,
+            last_name
+          },
+          emailRedirectTo: `${window.location.origin}/auth/callback`
         }
       });
 
-      if (error) {
-        throw error;
+      if (authError) {
+        console.error('Erro no registro:', authError);
+        throw authError;
       }
 
-      toast.success("Verifique seu e-mail para confirmar o cadastro.");
-      // Aguarda confirmação do e-mail antes de criar perfil
-      // Não cria perfil no banco antes da confirmação
-      // Redireciona para tela de login
+      if (!authData?.user) {
+        // Isso acontece quando o usuário precisa confirmar o e-mail
+        toast.success("Conta criada com sucesso! Verifique seu e-mail para confirmar o cadastro.");
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        navigate("/login");
+        return;
+      }
+
+      const userId = authData.user.id;
+      console.log('Usuário criado:', userId);
+
+      if (role === 'owner') {
+        console.log('Criando barbearia para o proprietário:', userId);
+        
+        // Aguarda um momento para garantir que os metadados foram processados
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        const { error: barbershopError } = await supabase
+          .from('barbershops')
+          .insert({
+            name: values.name,
+            owner_id: userId,
+            status: 'pending',
+            address: '',
+            city: ''
+          });
+
+        if (barbershopError) {
+          console.error('Erro ao criar barbearia:', barbershopError);
+          throw new Error(`Erro ao criar registro da barbearia: ${barbershopError.message}`);
+        }
+
+        console.log('Barbearia criada com sucesso');
+      }
+
+      toast.success("Conta criada com sucesso! Verifique seu e-mail para confirmar o cadastro.");
+      await new Promise(resolve => setTimeout(resolve, 1000));
       navigate("/login");
-      // Redireciona para área correta após login
-      // Se necessário, ajuste o fluxo pós-login para garantir que o proprietário vá para /proprietario
 
     } catch (error: any) {
+      console.error("Erro detalhado:", error);
       toast.error(error.message || "Erro ao criar conta");
-      console.error("Erro de registro:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleSocialRegister = async (provider: 'google' | 'facebook') => {
+    if (isLoading) return;
     setIsLoading(true);
     try {
       const role = userType === "cliente" ? "client" : "owner";
-      let userData: { [key: string]: any } = { role: role };
-
-      // For social logins, we might not have name details upfront, but we can still pass the role.
-      // If Supabase allows updating user metadata after initial sign-up, we can handle name parsing later.
-      // For now, ensure the role is passed.
 
       localStorage.setItem('intendedRole', role);
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
+          queryParams: {
+            role: role
+          }
         },
       });
 
@@ -102,8 +152,6 @@ export function RegisterForm() {
         console.error(`Error during ${provider} OAuth sign-in:`, error);
         setIsLoading(false);
       }
-      // If successful, Supabase handles the redirect. setIsLoading(false) might not be reached
-      // if redirection is immediate, but it's good for error cases.
     } catch (error: any) {
       toast.error(`Um erro inesperado ocorreu: ${error.message}`);
       console.error("Unexpected error during social registration:", error);
@@ -168,6 +216,42 @@ export function RegisterForm() {
                   </FormItem>
                 )}
               />
+              <FormField
+                control={form.control}
+                name="password_confirmation"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Confirmar Senha</FormLabel>
+                    <FormControl>
+                      <Input type="password" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="terms"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>
+                        Eu concordo com os{" "}
+                        <Link to="/termos" className="text-barber-gold hover:underline">
+                          Termos de uso
+                        </Link>
+                      </FormLabel>
+                      <FormMessage />
+                    </div>
+                  </FormItem>
+                )}
+              />
               <Button type="submit" className="w-full bg-barber-gold hover:bg-barber-gold/80" disabled={isLoading}>
                 {isLoading ? "Criando conta..." : "Criar conta"}
               </Button>
@@ -226,6 +310,42 @@ export function RegisterForm() {
                   </FormItem>
                 )}
               />
+              <FormField
+                control={form.control}
+                name="password_confirmation"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Confirmar Senha</FormLabel>
+                    <FormControl>
+                      <Input type="password" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="terms"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>
+                        Eu concordo com os{" "}
+                        <Link to="/termos" className="text-barber-gold hover:underline">
+                          Termos de uso
+                        </Link>
+                      </FormLabel>
+                      <FormMessage />
+                    </div>
+                  </FormItem>
+                )}
+              />
               <Button type="submit" className="w-full bg-barber-gold hover:bg-barber-gold/80" disabled={isLoading}>
                 {isLoading ? "Criando conta..." : "Criar conta"}
               </Button>
@@ -268,20 +388,7 @@ export function RegisterForm() {
         onClick={() => handleSocialRegister("google")}
         disabled={isLoading}
       >
-        <svg
-          className="mr-2 h-4 w-4"
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <circle cx="12" cy="12" r="10" />
-          <line x1="2" y1="12" x2="22" y2="12" />
-          <line x1="12" y1="2" x2="12" y2="22" />
-        </svg>
+        <FcGoogle className="mr-2 h-4 w-4" />
         Google
       </Button>
     </div>

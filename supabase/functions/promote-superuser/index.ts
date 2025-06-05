@@ -1,8 +1,7 @@
-
 // index.ts - Função promote-superuser para Supabase Edge Functions
 // ATENÇÃO: Certifique-se de definir variáveis de ambiente seguras em produção e NUNCA exponha chaves sensíveis!
 import { createClient } from '@supabase/supabase-js'
-import { serve } from "https://deno.land/std@0.181.0/http/server.ts";
+import { serve } from "std/http/server.ts";
 
 // Defina as origens permitidas para produção
 const allowedOrigins = [

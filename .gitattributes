@@ -1,0 +1,15 @@
+# Configuração padrão para todos os arquivos
+* text=auto eol=lf
+
+# Arquivos específicos que devem manter CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Arquivos binários que não devem ser modificados
+*.png binary
+*.jpg binary
+*.gif binary
+*.ico binary
+*.zip binary
+*.pdf binary 

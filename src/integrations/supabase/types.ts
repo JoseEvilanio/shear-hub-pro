@@ -291,6 +291,8 @@ export type Database = {
           id: string
           role: string | null
           updated_at: string | null
+          first_name: string | null
+          last_name: string | null
         }
         Insert: {
           created_at?: string | null
@@ -298,6 +300,8 @@ export type Database = {
           id: string
           role?: string | null
           updated_at?: string | null
+          first_name?: string | null
+          last_name?: string | null
         }
         Update: {
           created_at?: string | null
@@ -305,6 +309,8 @@ export type Database = {
           id?: string
           role?: string | null
           updated_at?: string | null
+          first_name?: string | null
+          last_name?: string | null
         }
         Relationships: []
       }

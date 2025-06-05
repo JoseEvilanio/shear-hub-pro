@@ -1,0 +1,5 @@
+{
+  "mcpServers": {
+    "command": "npx -y @smithery/cli@latest install @showfive/playwright-mcp-server --client cursor --key d567d091-26c6-48bc-987c-2d517b1af00e"
+  }
+} 
