@@ -286,33 +286,50 @@ export type Database = {
       }
       profiles: {
         Row: {
-          created_at: string | null
-          email: string | null
           id: string
-          role: string | null
-          updated_at: string | null
           first_name: string | null
           last_name: string | null
+          email: string | null
+          phone: string | null
+          data: Json | null
+          genero: string | null
+          biografia: string | null
+          created_at: string | null
+          updated_at: string | null
         }
         Insert: {
-          created_at?: string | null
-          email?: string | null
           id: string
-          role?: string | null
-          updated_at?: string | null
           first_name?: string | null
           last_name?: string | null
+          email?: string | null
+          phone?: string | null
+          data?: Json | null
+          genero?: string | null
+          biografia?: string | null
+          created_at?: string | null
+          updated_at?: string | null
         }
         Update: {
-          created_at?: string | null
-          email?: string | null
           id?: string
-          role?: string | null
-          updated_at?: string | null
           first_name?: string | null
           last_name?: string | null
+          email?: string | null
+          phone?: string | null
+          data?: Json | null
+          genero?: string | null
+          biografia?: string | null
+          created_at?: string | null
+          updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       subscription_plans: {
         Row: {

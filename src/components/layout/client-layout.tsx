@@ -51,20 +51,51 @@ export function ClientLayout({ children }: ClientLayoutProps) {
         // Buscar dados do perfil do usuário
         const { data: profile, error } = await supabase
           .from("profiles")
-          .select("email")
+          .select("first_name, last_name, email, role")
           .eq("id", session.user.id)
           .single();
 
         if (error) {
           console.error("Erro ao buscar perfil:", error);
-          setUserName(session.user.email?.split("@")[0] || "Usuário");
+          // Se o perfil não existir, criar um novo
+          if (error.code === 'PGRST116') {
+            const { error: insertError } = await supabase
+              .from("profiles")
+              .insert({
+                id: session.user.id,
+                email: session.user.email,
+                role: 'client',
+                first_name: session.user.email?.split('@')[0] || '',
+                last_name: ''
+              });
+            
+            if (insertError) {
+              console.error("Erro ao criar perfil:", insertError);
+              toast.error("Erro ao criar perfil do usuário");
+              return;
+            }
+            
+            setUserName(session.user.email?.split('@')[0] || "Usuário");
+            return;
+          }
+          
+          toast.error("Erro ao carregar perfil");
           return;
         }
 
         if (profile) {
-          setUserName(profile.email?.split("@")[0] || "Usuário");
-        } else {
-          setUserName(session.user.email?.split("@")[0] || "Usuário");
+          // Verificar se o usuário tem permissão de cliente
+          if (profile.role !== 'client') {
+            toast.error("Acesso restrito apenas para clientes");
+            navigate("/login");
+            return;
+          }
+          
+          const displayName = profile.first_name 
+            ? `${profile.first_name} ${profile.last_name || ''}`.trim()
+            : profile.email?.split('@')[0] || "Usuário";
+            
+          setUserName(displayName);
         }
       } catch (error) {
         console.error("Erro na autenticação:", error);

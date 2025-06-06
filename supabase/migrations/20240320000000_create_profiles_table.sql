@@ -5,9 +5,13 @@ drop table if exists public.profiles cascade;
 create table if not exists public.profiles (
   id uuid references auth.users on delete cascade not null primary key,
   email text not null,
-  role text not null check (role in ('client', 'owner')),
+  role text not null check (role in ('client', 'owner', 'admin', 'superuser')),
   first_name text,
   last_name text,
+  phone text,
+  data jsonb default '{}'::jsonb,
+  genero text,
+  biografia text,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
@@ -19,6 +23,8 @@ alter table public.profiles enable row level security;
 drop policy if exists "Usuários podem ver seus próprios perfis" on public.profiles;
 drop policy if exists "Usuários podem atualizar seus próprios perfis" on public.profiles;
 drop policy if exists "Usuários podem inserir seus próprios perfis" on public.profiles;
+drop policy if exists "Admins podem ver todos os perfis" on public.profiles;
+drop policy if exists "Admins podem atualizar todos os perfis" on public.profiles;
 
 -- Create policies
 create policy "Usuários podem ver seus próprios perfis"
@@ -32,6 +38,20 @@ create policy "Usuários podem atualizar seus próprios perfis"
 create policy "Usuários podem inserir seus próprios perfis"
   on public.profiles for insert
   with check (auth.uid() = id);
+
+-- Política para admins verem todos os perfis
+create policy "Admins podem ver todos os perfis"
+  on public.profiles for select
+  using (
+    (select role from public.profiles where id = auth.uid()) in ('admin', 'superuser')
+  );
+
+-- Política para admins atualizarem todos os perfis
+create policy "Admins podem atualizar todos os perfis"
+  on public.profiles for update
+  using (
+    (select role from public.profiles where id = auth.uid()) in ('admin', 'superuser')
+  );
 
 -- Drop existing function and trigger if they exist
 drop trigger if exists on_auth_user_created on auth.users;
@@ -53,13 +73,17 @@ begin
 
   begin
     -- Insert into profiles table with the user's id
-    insert into public.profiles (id, email, role, first_name, last_name)
+    insert into public.profiles (id, email, role, first_name, last_name, phone, data, genero, biografia)
     values (
       new.id,  -- Explicitly set the id to match auth.users
       new.email,
       user_role,
       coalesce(new.raw_user_meta_data->>'first_name', ''),
-      coalesce(new.raw_user_meta_data->>'last_name', '')
+      coalesce(new.raw_user_meta_data->>'last_name', ''),
+      coalesce(new.raw_user_meta_data->>'phone', ''),
+      coalesce(new.raw_user_meta_data->'data', '{}'::jsonb),
+      coalesce(new.raw_user_meta_data->>'genero', ''),
+      coalesce(new.raw_user_meta_data->>'biografia', '')
     );
     
     raise notice 'Successfully created profile for user: %', new.id;
@@ -72,24 +96,9 @@ begin
     raise exception 'Failed to create profile: %', error_message;
   end;
 
-  -- If user is a client, also insert into clients table
-  if user_role = 'client' then
-    -- We need the barbershop_id for the clients table.
-    -- This assumes the client is registering *through* a specific barbershop's flow.
-    -- If a client can register independently, this logic needs adjustment.
-    -- For now, we'll assume a default or require barbershop_id in metadata if needed.
-    -- Let's assume for now that barbershop_id will be handled when the client interacts with a barbershop.
-    -- Or, we can link a client to a barbershop upon their first booking/interaction.
-    -- Leaving insertion into clients table out for now until we define that flow.
-    null; -- Placeholder
-  end if;
-
   return new;
 end;
 $$ language plpgsql security definer;
-
--- Drop the trigger if it exists (explicitly)
-drop trigger if exists on_auth_user_created on auth.users;
 
 -- Create trigger for new user signup
 create trigger on_auth_user_created
