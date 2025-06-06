@@ -34,9 +34,9 @@ export default function AdminDashboard() {
         adminApi.getActivityLogs()
       ]);
       
-      setStats(appStats);
-      setBarbershops(barbershopsData);
-      setLogs(logsData);
+      setStats(appStats || null);
+      setBarbershops(barbershopsData || []);
+      setLogs(logsData || []);
     } catch (err) {
       console.error('Error fetching admin dashboard data:', err);
       setError('Erro ao carregar os dados. Por favor, tente novamente.');

@@ -1,11 +1,10 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 export const appointmentsAdminApi = {
   // Função para obter todos os agendamentos
   async getAppointments() {
     const { data, error } = await supabase
-      .from('appointments')
+      .from('bookings')
       .select('*');
       
     if (error) {
@@ -28,7 +27,7 @@ export const appointmentsAdminApi = {
     payment_status: string;
   }) {
     const { data, error } = await supabase
-      .from('appointments')
+      .from('bookings')
       .insert(appointmentData)
       .select()
       .single();
@@ -44,7 +43,7 @@ export const appointmentsAdminApi = {
   // Função para atualizar o status de um agendamento
   async updateAppointmentStatus(id: string, status: string) {
     const { data, error } = await supabase
-      .from('appointments')
+      .from('bookings')
       .update({ status })
       .eq('id', id)
       .select()

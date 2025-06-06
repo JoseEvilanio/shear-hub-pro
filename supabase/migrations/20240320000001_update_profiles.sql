@@ -10,11 +10,8 @@ alter table public.profiles
   add column if not exists phone text,
   add column if not exists data jsonb default '{}'::jsonb,
   add column if not exists genero text,
-  add column if not exists biografia text;
-
--- Remover coluna role
-alter table public.profiles
-  drop column if exists role;
+  add column if not exists biografia text,
+  add column if not exists role text;
 
 -- Criar função is_superuser
 create or replace function public.is_superuser()
@@ -22,9 +19,9 @@ returns boolean as $$
 begin
   return exists (
     select 1
-    from auth.users
-    where auth.users.id = auth.uid()
-    and auth.users.raw_user_meta_data->>'role' = 'superuser'
+    from public.profiles
+    where public.profiles.id = auth.uid()
+    and public.profiles.role = 'superuser'
   );
 end;
 $$ language plpgsql security definer;

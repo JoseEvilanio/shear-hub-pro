@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { PaymentStats } from '@/types/admin';
 
@@ -8,7 +7,7 @@ export const paymentsAdminApi = {
     // 1. Fetch all payments
     const { data: payments, error: paymentsError } = await supabase
       .from('payments')
-      .select('id, barbershop_id, amount, status, payment_date, payment_method, invoice_url');
+      .select('id, barbershop_id, amount, status, processed_at, payment_method, invoice_url');
 
     if (paymentsError) {
       console.error('Error fetching payments:', paymentsError);
@@ -48,22 +47,20 @@ export const paymentsAdminApi = {
       }
     }
 
-    // 5. Iterate through payments and attach barbershop_name
-    const paymentsWithShopNames = payments.map(payment => {
-      const barbershop_name = payment.barbershop_id 
-        ? barbershopMap.get(payment.barbershop_id.toString()) || 'Unknown' 
-        : 'Unknown';
-      
-      return {
-        ...payment,
-        status: payment.status as 'pending' | 'paid' | 'failed' | 'refunded', // Ensure status is properly typed
-        barbershop_name: barbershop_name,
-        // Ensure all fields from PaymentStats are present, or cast appropriately
-        // id, amount, status, payment_date, payment_method, invoice_url are from payments query
-        // barbershop_id is also from payments query
-      } as PaymentStats; // Cast to PaymentStats
-    });
+    // 5. Map payments data to PaymentStats structure
+    const paymentStats: PaymentStats[] = payments.map(p => ({
+      id: p.id,
+      barbershop_id: p.barbershop_id || '',
+      barbershop_name: barbershopMap.get(p.barbershop_id?.toString() || '') || 'Barbearia Desconhecida',
+      amount: p.amount || 0,
+      status: p.status || 'pending', // Usar um valor padrão se status for nulo
+      // Ajustar para usar processed_at para a data
+      payment_date: p.processed_at ? new Date(p.processed_at).toLocaleDateString('pt-BR') : 'Sem data',
+      payment_method: p.payment_method || 'Desconhecido',
+      invoice_url: p.invoice_url,
+      // Adicionar outras propriedades conforme necessário, com valores padrão
+    }));
 
-    return paymentsWithShopNames;
+    return paymentStats;
   }
 };

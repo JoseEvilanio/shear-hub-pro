@@ -10,7 +10,8 @@ import {
   Settings, 
   ChevronRight,
   Shield,
-  Loader2
+  Loader2,
+  LogOut
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -69,6 +70,18 @@ function AdminLayoutBase({ children }: AdminLayoutProps) {
     checkAuth();
   }, [navigate]);
   
+  // Função para lidar com o logout
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      toast.success("Você saiu da sua conta administrativa");
+      navigate("/login"); // Redirecionar para a página de login após o logout
+    } catch (error) {
+      console.error('Erro ao fazer logout:', error);
+      toast.error('Erro ao fazer logout');
+    }
+  };
+
   const menuItems = [
     { name: 'Dashboard', path: '/admin', icon: <LayoutDashboard size={20} /> },
     { name: 'Barbearias', path: '/admin/barbearias', icon: <Store size={20} /> },
@@ -124,6 +137,19 @@ function AdminLayoutBase({ children }: AdminLayoutProps) {
                 </Link>
               </li>
             ))}
+            {/* Botão de Logout */}
+            <li>
+              <button 
+                onClick={handleLogout} // Adicionando o evento de clique
+                className={cn(
+                  "flex items-center gap-3 px-3 py-2 rounded-md transition-colors w-full text-left",
+                  "hover:bg-destructive hover:text-destructive-foreground text-muted-foreground"
+                )}
+              >
+                <LogOut size={20} />
+                <span>Sair</span>
+              </button>
+            </li>
           </ul>
         </nav>
       </aside>
