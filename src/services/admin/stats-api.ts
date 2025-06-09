@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { AppStats } from '@/types/admin';
 
@@ -29,7 +28,7 @@ export const statsAdminApi = {
     const { count: total_barbers } = await supabase
       .from('barbers')
       .select('*', { count: 'exact', head: true })
-      .eq('status', 'active');
+      .eq('is_active', true);
     
     // Count of appointments
     const { count: total_appointments } = await supabase
@@ -52,7 +51,7 @@ export const statsAdminApi = {
       .from('payments')
       .select('amount')
       .eq('status', 'paid')
-      .gte('payment_date', startOfMonth.toISOString());
+      .gte('processed_at', startOfMonth.toISOString());
     
     const monthly_revenue = monthlyPayments?.reduce((sum, payment) => sum + parseFloat(payment.amount as any), 0) || 0;
     

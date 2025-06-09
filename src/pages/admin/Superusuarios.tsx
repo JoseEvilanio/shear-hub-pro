@@ -1,17 +1,15 @@
-
 import { useState } from 'react';
-import { AdminLayout } from '@/components/admin/AdminLayout';
+import { ProtectedAdminLayout } from '@/components/admin/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { withSuperUserProtection } from '@/contexts/SuperUserContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertTriangle, Check, Info } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 
-function SuperUserManagerPage() {
+export default function Superusuarios() {
   const [email, setEmail] = useState('');
   const [adminKey, setAdminKey] = useState('');
   const [loading, setLoading] = useState(false);
@@ -182,7 +180,7 @@ function SuperUserManagerPage() {
   };
 
   return (
-    <AdminLayout>
+    <ProtectedAdminLayout>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <h2 className="text-3xl font-bold tracking-tight">Gerenciar Superusuários</h2>
@@ -251,14 +249,8 @@ function SuperUserManagerPage() {
                   disabled={loading || cooldown}
                   className="w-full"
                 >
-                  {loading ? "Criando..." : cooldown ? `Aguarde (${cooldownTimer}s)` : "Criar Superusuário"}
+                  {loading ? 'Criando...' : 'Criar Superusuário'}
                 </Button>
-
-                {cooldown && (
-                  <p className="text-xs text-amber-600 mt-2">
-                    Aguarde um momento antes de criar outro usuário para evitar erros de limite de taxa.
-                  </p>
-                )}
               </form>
             </CardContent>
           </Card>
@@ -269,7 +261,7 @@ function SuperUserManagerPage() {
             <CardHeader>
               <CardTitle>Promover Usuário Existente</CardTitle>
               <CardDescription>
-                Promova um usuário existente para superusuário
+                Use este formulário para promover um usuário existente para superusuário
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -303,14 +295,8 @@ function SuperUserManagerPage() {
                   disabled={loading || cooldown}
                   className="w-full"
                 >
-                  {loading ? "Promovendo..." : cooldown ? `Aguarde (${cooldownTimer}s)` : "Promover para Superusuário"}
+                  {loading ? 'Promovendo...' : 'Promover para Superusuário'}
                 </Button>
-
-                {cooldown && (
-                  <p className="text-xs text-amber-600 mt-2">
-                    Aguarde um momento antes de promover outro usuário para evitar erros de limite de taxa.
-                  </p>
-                )}
               </form>
             </CardContent>
           </Card>
@@ -323,17 +309,27 @@ function SuperUserManagerPage() {
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
-        
+
         {success && (
           <Alert variant="default" className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-900/50">
             <Check className="h-4 w-4 text-green-600 dark:text-green-400" />
             <AlertTitle className="text-green-800 dark:text-green-400">Sucesso</AlertTitle>
-            <AlertDescription className="text-green-700 dark:text-green-300">{success}</AlertDescription>
+            <AlertDescription className="text-green-700 dark:text-green-300">
+              {success}
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {cooldown && (
+          <Alert variant="default" className="bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-900/50">
+            <AlertTriangle className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
+            <AlertTitle className="text-yellow-800 dark:text-yellow-400">Aguarde</AlertTitle>
+            <AlertDescription className="text-yellow-700 dark:text-yellow-300">
+              Por motivos de segurança, aguarde {cooldownTimer} segundos antes de tentar novamente.
+            </AlertDescription>
           </Alert>
         )}
       </div>
-    </AdminLayout>
+    </ProtectedAdminLayout>
   );
 }
-
-export default withSuperUserProtection(SuperUserManagerPage);

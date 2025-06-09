@@ -17,10 +17,16 @@ create index if not exists activity_logs_created_at_idx on public.activity_logs(
 alter table public.activity_logs enable row level security;
 
 -- Políticas de segurança
+-- Remover política existente se houver, antes de criar
+drop policy if exists "Admins podem ver logs de atividade" on public.activity_logs;
+
 -- Apenas administradores podem ver os logs
 create policy "Admins podem ver logs de atividade"
   on public.activity_logs for select
   using (is_superuser()); -- Reutilizando a função is_superuser
+
+-- Remover política existente se houver, antes de criar
+drop policy if exists "Usuários autenticados podem inserir logs" on public.activity_logs;
 
 -- Usuários autenticados podem inserir logs (por exemplo, para ações que eles mesmos realizam)
 create policy "Usuários autenticados podem inserir logs"

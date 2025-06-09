@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { AdminLayout } from '@/components/admin/AdminLayout';
+import { ProtectedAdminLayout } from '@/components/admin/AdminLayout';
 import { StatsCards } from '@/components/admin/StatsCards';
 import { BarbershopsTable } from '@/components/admin/BarbershopsTable';
 import { ActivityLogsList } from '@/components/admin/ActivityLogsList';
@@ -16,8 +16,20 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, RefreshCw } from "lucide-react";
 import { Button } from '@/components/ui/button';
 
+// Estado inicial para as estatísticas
+const initialStats: AppStats = {
+  total_barbershops: 0,
+  active_barbershops: 0,
+  blocked_barbershops: 0,
+  total_clients: 0,
+  total_barbers: 0,
+  total_appointments: 0,
+  total_revenue: 0,
+  monthly_revenue: 0
+};
+
 export default function AdminDashboard() {
-  const [stats, setStats] = useState<AppStats | null>(null);
+  const [stats, setStats] = useState<AppStats>(initialStats);
   const [barbershops, setBarbershops] = useState<BarbershopStats[]>([]);
   const [logs, setLogs] = useState<ActivityLog[]>([]);
   const [loading, setLoading] = useState(true);
@@ -34,12 +46,13 @@ export default function AdminDashboard() {
         adminApi.getActivityLogs()
       ]);
       
-      setStats(appStats || null);
+      setStats(appStats || initialStats);
       setBarbershops(barbershopsData || []);
       setLogs(logsData || []);
     } catch (err) {
       console.error('Error fetching admin dashboard data:', err);
       setError('Erro ao carregar os dados. Por favor, tente novamente.');
+      setStats(initialStats);
     } finally {
       setLoading(false);
     }
@@ -55,7 +68,7 @@ export default function AdminDashboard() {
   );
 
   return (
-    <AdminLayout>
+    <ProtectedAdminLayout>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <h2 className="text-3xl font-bold tracking-tight">Painel de Controle</h2>
@@ -79,7 +92,7 @@ export default function AdminDashboard() {
         )}
 
         {/* Main Stats */}
-        {stats && <StatsCards stats={stats} />}
+        <StatsCards stats={stats} />
 
         {/* Content grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -143,6 +156,6 @@ export default function AdminDashboard() {
           </Card>
         </div>
       </div>
-    </AdminLayout>
+    </ProtectedAdminLayout>
   );
 }

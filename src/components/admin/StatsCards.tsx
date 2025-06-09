@@ -1,4 +1,3 @@
-
 import { AppStats } from '@/types/admin';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScissorsIcon, Users, Calendar, DollarSign, Building2 } from 'lucide-react';
@@ -12,7 +11,7 @@ export function StatsCards({ stats }: StatsCardsProps) {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL',
-    }).format(value);
+    }).format(value || 0);
   };
 
   return (
@@ -23,9 +22,9 @@ export function StatsCards({ stats }: StatsCardsProps) {
           <Building2 className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{stats.total_barbershops}</div>
+          <div className="text-2xl font-bold">{stats.total_barbershops || 0}</div>
           <p className="text-xs text-muted-foreground">
-            {stats.active_barbershops} ativas / {stats.blocked_barbershops} bloqueadas
+            {stats.active_barbershops || 0} ativas / {stats.blocked_barbershops || 0} bloqueadas
           </p>
         </CardContent>
       </Card>
@@ -36,9 +35,9 @@ export function StatsCards({ stats }: StatsCardsProps) {
           <Users className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{stats.total_clients}</div>
+          <div className="text-2xl font-bold">{stats.total_clients || 0}</div>
           <p className="text-xs text-muted-foreground">
-            {stats.total_barbers} barbeiros cadastrados
+            {stats.total_barbers || 0} barbeiros cadastrados
           </p>
         </CardContent>
       </Card>
@@ -49,7 +48,7 @@ export function StatsCards({ stats }: StatsCardsProps) {
           <Calendar className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{stats.total_appointments}</div>
+          <div className="text-2xl font-bold">{stats.total_appointments || 0}</div>
         </CardContent>
       </Card>
       

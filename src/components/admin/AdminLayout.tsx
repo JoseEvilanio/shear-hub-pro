@@ -23,144 +23,173 @@ interface AdminLayoutProps {
   children: ReactNode;
 }
 
-function AdminLayoutBase({ children }: AdminLayoutProps) {
+export const AdminLayout = ({ children }: AdminLayoutProps) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(true);
-  const [userName, setUserName] = useState('Admin');
-  
+  const [isSuperUser, setIsSuperUser] = useState<boolean>(false);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    const checkAuth = async () => {
+    const checkSuperUser = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
         
         if (!session) {
-          toast.error('Você precisa estar logado para acessar esta página');
-          navigate('/login');
+          navigate('/admin/login');
           return;
         }
-        
-        // Get user profile
-        const { data: profile, error } = await supabase
+
+        const { data: profile } = await supabase
           .from('profiles')
-          .select('email, role')
+          .select('role')
           .eq('id', session.user.id)
           .single();
-        
-        if (profile) {
-          // Set user name from email since first_name doesn't exist
-          const emailName = profile.email ? profile.email.split('@')[0] : 'Admin'; 
-          setUserName(emailName);
-          
-          // Check if user is admin or superuser
-          if (profile.role !== 'admin' && profile.role !== 'superuser') {
-            toast.error('Acesso restrito apenas para Administradores');
-            navigate('/login');
-          }
-        }
+
+        setIsSuperUser(profile?.role === 'superuser');
       } catch (error) {
-        console.error('Error checking authentication:', error);
-        toast.error('Erro ao verificar autenticação');
-        navigate('/login');
+        console.error('Error checking superuser status:', error);
+        toast.error('Erro ao verificar permissões');
       } finally {
-        setIsLoading(false);
+        setLoading(false);
       }
     };
-    
-    checkAuth();
+
+    checkSuperUser();
   }, [navigate]);
-  
-  // Função para lidar com o logout
+
   const handleLogout = async () => {
     try {
-      await supabase.auth.signOut();
-      toast.success("Você saiu da sua conta administrativa");
-      navigate("/login"); // Redirecionar para a página de login após o logout
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      navigate('/admin/login');
     } catch (error) {
-      console.error('Erro ao fazer logout:', error);
+      console.error('Error logging out:', error);
       toast.error('Erro ao fazer logout');
     }
   };
 
-  const menuItems = [
-    { name: 'Dashboard', path: '/admin', icon: <LayoutDashboard size={20} /> },
-    { name: 'Barbearias', path: '/admin/barbearias', icon: <Store size={20} /> },
-    { name: 'Usuários', path: '/admin/usuarios', icon: <Users size={20} /> },
-    { name: 'Superusuários', path: '/admin/superusers', icon: <Shield size={20} /> },
-    { name: 'Pagamentos', path: '/admin/pagamentos', icon: <CreditCard size={20} /> },
-    { name: 'Relatórios', path: '/admin/relatorios', icon: <BarChart size={20} /> },
-    { name: 'Notificações', path: '/admin/notificacoes', icon: <Bell size={20} /> },
-    { name: 'Configurações', path: '/admin/configuracoes', icon: <Settings size={20} /> },
-  ];
-
-  if (isLoading) {
+  if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen">
+      <div className="flex h-screen items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <span className="ml-2 text-lg">Carregando...</span>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen bg-background">
-      {/* Side Navigation */}
-      <aside className="w-64 border-r border-border bg-card min-h-screen">
-        <div className="p-4 border-b border-border flex items-center gap-3">
-          <Avatar className="bg-primary text-primary-foreground">
-            <AvatarFallback>{userName.substring(0, 2).toUpperCase()}</AvatarFallback>
-          </Avatar>
-          <div>
-            <h2 className="font-bold">{userName}</h2>
-            <p className="text-xs text-muted-foreground">Painel administrativo</p>
-          </div>
+    <div className="flex min-h-screen">
+      {/* Sidebar */}
+      <aside className="w-64 border-r bg-background">
+        <div className="flex h-16 items-center border-b px-4">
+          <Link to="/admin" className="flex items-center gap-2 font-semibold">
+            <Shield className="h-6 w-6" />
+            <span>Admin</span>
+          </Link>
         </div>
-        
-        <nav className="mt-4">
-          <ul className="space-y-1 px-2">
-            {menuItems.map((item) => (
-              <li key={item.path}>
-                <Link 
-                  to={item.path} 
-                  className={cn(
-                    "flex items-center gap-3 px-3 py-2 rounded-md transition-colors",
-                    location.pathname === item.path 
-                      ? "bg-primary text-primary-foreground" 
-                      : "hover:bg-accent hover:text-accent-foreground text-muted-foreground"
-                  )}
-                >
-                  {item.icon}
-                  <span>{item.name}</span>
-                  {location.pathname === item.path && (
-                    <ChevronRight className="ml-auto h-4 w-4" />
-                  )}
-                </Link>
-              </li>
-            ))}
-            {/* Botão de Logout */}
-            <li>
-              <button 
-                onClick={handleLogout} // Adicionando o evento de clique
-                className={cn(
-                  "flex items-center gap-3 px-3 py-2 rounded-md transition-colors w-full text-left",
-                  "hover:bg-destructive hover:text-destructive-foreground text-muted-foreground"
-                )}
-              >
-                <LogOut size={20} />
-                <span>Sair</span>
-              </button>
-            </li>
-          </ul>
+        <nav className="space-y-1 p-4">
+          <Link
+            to="/admin"
+            className={cn(
+              "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
+              location.pathname === "/admin" && "bg-accent"
+            )}
+          >
+            <LayoutDashboard className="h-4 w-4" />
+            Dashboard
+          </Link>
+          <Link
+            to="/admin/barbearias"
+            className={cn(
+              "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
+              location.pathname === "/admin/barbearias" && "bg-accent"
+            )}
+          >
+            <Store className="h-4 w-4" />
+            Barbearias
+          </Link>
+          <Link
+            to="/admin/usuarios"
+            className={cn(
+              "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
+              location.pathname === "/admin/usuarios" && "bg-accent"
+            )}
+          >
+            <Users className="h-4 w-4" />
+            Usuários
+          </Link>
+          <Link
+            to="/admin/pagamentos"
+            className={cn(
+              "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
+              location.pathname === "/admin/pagamentos" && "bg-accent"
+            )}
+          >
+            <CreditCard className="h-4 w-4" />
+            Pagamentos
+          </Link>
+          <Link
+            to="/admin/relatorios"
+            className={cn(
+              "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
+              location.pathname === "/admin/relatorios" && "bg-accent"
+            )}
+          >
+            <BarChart className="h-4 w-4" />
+            Relatórios
+          </Link>
+          <Link
+            to="/admin/notificacoes"
+            className={cn(
+              "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
+              location.pathname === "/admin/notificacoes" && "bg-accent"
+            )}
+          >
+            <Bell className="h-4 w-4" />
+            Notificações
+          </Link>
+          <Link
+            to="/admin/configuracoes"
+            className={cn(
+              "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
+              location.pathname === "/admin/configuracoes" && "bg-accent"
+            )}
+          >
+            <Settings className="h-4 w-4" />
+            Configurações
+          </Link>
+          {isSuperUser && (
+            <Link
+              to="/admin/superusuarios"
+              className={cn(
+                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
+                location.pathname === "/admin/superusuarios" && "bg-accent"
+              )}
+            >
+              <Shield className="h-4 w-4" />
+              Superusuários
+            </Link>
+          )}
         </nav>
+        <div className="mt-auto border-t p-4">
+          <button
+            onClick={handleLogout}
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-red-500 transition-all hover:bg-accent"
+          >
+            <LogOut className="h-4 w-4" />
+            Sair
+          </button>
+        </div>
       </aside>
-      
-      {/* Main Content */}
-      <div className="flex-1 overflow-auto">
-        <main className="w-full p-4 md:p-6 lg:p-8">{children}</main>
-      </div>
+
+      {/* Main content */}
+      <main className="flex-1 overflow-y-auto">
+        <div className="container mx-auto p-6">
+          {children}
+        </div>
+      </main>
     </div>
   );
-}
+};
 
-// Wrap with superuser protection
-export const AdminLayout = withSuperUserProtection(AdminLayoutBase);
+// Export both the base component and the protected version
+export const ProtectedAdminLayout = withSuperUserProtection(AdminLayout);

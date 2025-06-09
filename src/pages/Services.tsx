@@ -24,14 +24,15 @@ import {
 
 // Define an interface for the Service data
 interface Service {
-  id: string; // Assuming ID is a string from Supabase (e.g., UUID)
+  id: string;
+  barbershop_id: string;
   name: string;
-  description?: string | null; // Optional
-  duration: number; // Assuming duration in minutes
+  description?: string | null;
   price: number;
-  user_id?: string; // Assuming services are linked to a user
-  barbershop_id?: string | null; // Assuming services might be linked to a barbershop
-  // Add other fields if necessary, like created_at, category, etc.
+  duration_minutes: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
 const Services = () => {
@@ -51,16 +52,37 @@ const Services = () => {
       if (!user) {
         toast.error("Usuário não autenticado.");
         setIsLoading(false);
-        setServices([]); // Clear services if user is not authenticated
+        setServices([]);
         return;
       }
 
-      // Fetch services associated with the user.
-      // TODO: Adjust if services should be fetched via a barbershop_id linked to the user.
+      // Primeiro, buscar a barbearia do usuário
+      const { data: barbershops, error: barbershopError } = await supabase
+        .from('barbershops')
+        .select('id')
+        .eq('owner_id', user.id);
+
+      if (barbershopError) {
+        toast.error("Erro ao buscar barbearia.");
+        console.error("Error fetching barbershop:", barbershopError);
+        setServices([]);
+        return;
+      }
+
+      if (!barbershops || barbershops.length === 0) {
+        toast.error("Nenhuma barbearia encontrada para este usuário.");
+        setServices([]);
+        return;
+      }
+
+      // Usar a primeira barbearia encontrada
+      const barbershopId = barbershops[0].id;
+
+      // Agora buscar os serviços da barbearia
       const { data, error } = await supabase
         .from('services')
         .select('*')
-        .eq('user_id', user.id) // Assuming services are directly linked to user_id
+        .eq('barbershop_id', barbershopId)
         .order('name', { ascending: true });
 
       if (error) {
@@ -86,6 +108,18 @@ const Services = () => {
   const handleEditService = (service: Service) => {
     setSelectedService(service);
     setIsEditModalOpen(true);
+  };
+
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false);
+    setTimeout(() => {
+      setSelectedService(null);
+    }, 100);
+  };
+
+  const handleSuccess = () => {
+    fetchServices();
+    handleCloseEditModal();
   };
 
   const handleOpenDeleteDialog = (service: Service) => {
@@ -132,7 +166,7 @@ const Services = () => {
 
   const totalServices = services.length;
   const averageDuration = totalServices > 0 
-    ? Math.round(services.reduce((acc, service) => acc + service.duration, 0) / totalServices)
+    ? Math.round(services.reduce((acc, service) => acc + service.duration_minutes, 0) / totalServices)
     : 0;
   const averagePrice = totalServices > 0
     ? (services.reduce((acc, service) => acc + service.price, 0) / totalServices)
@@ -230,7 +264,7 @@ const Services = () => {
                       <TableRow key={service.id}>
                         <TableCell className="font-medium">{service.name}</TableCell>
                         <TableCell>{service.description || "-"}</TableCell>
-                        <TableCell>{service.duration} min</TableCell>
+                        <TableCell>{service.duration_minutes} min</TableCell>
                         <TableCell>R$ {Number(service.price).toFixed(2)}</TableCell>
                         <TableCell>
                           <div className="flex space-x-2">
@@ -275,7 +309,7 @@ const Services = () => {
                     <CardContent>
                       <div className="flex items-center space-x-2">
                         <Clock className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-muted-foreground">{service.duration} minutos</span>
+                        <span className="text-muted-foreground">{service.duration_minutes} minutos</span>
                       </div>
                       <p className="mt-4 text-2xl font-bold">
                         R$ {Number(service.price).toFixed(2)}
@@ -314,11 +348,11 @@ const Services = () => {
         onServiceAdded={fetchServices} // Pass fetchServices to refresh list
       />
 
-      <ServiceEditModal 
-        isOpen={isEditModalOpen} 
-        onClose={() => setIsEditModalOpen(false)} 
+      <ServiceEditModal
         service={selectedService}
-        onServiceUpdated={fetchServices} // Pass fetchServices to refresh list
+        isOpen={isEditModalOpen}
+        onClose={handleCloseEditModal}
+        onSuccess={handleSuccess}
       />
 
       {/* Delete Confirmation Dialog */}

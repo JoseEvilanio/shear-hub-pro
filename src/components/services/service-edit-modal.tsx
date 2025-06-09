@@ -1,4 +1,3 @@
-
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,189 +10,154 @@ import { toast } from "sonner"; // Import toast
 // Define an interface for the Service data consistent with parent page
 interface Service {
   id: string;
+  barbershop_id: string;
   name: string;
   description?: string | null;
-  duration: number;
   price: number;
-  category?: string | null;
-  user_id?: string;
-  barbershop_id?: string | null;
+  duration_minutes: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
 }
+
 interface ServiceEditModalProps {
+  service: Service | null;
   isOpen: boolean;
   onClose: () => void;
-  service: Service | null; // Allow service to be null initially
-  onServiceUpdated: () => void; // Prop to refresh service list
+  onSuccess: () => void;
 }
 
-export const ServiceEditModal = ({ isOpen, onClose, service, onServiceUpdated }: ServiceEditModalProps) => {
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [duration, setDuration] = useState("");
-  const [price, setPrice] = useState("");
-  const [category, setCategory] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+export function ServiceEditModal({ service, isOpen, onClose, onSuccess }: ServiceEditModalProps) {
+  // Inicializar estados com valores vazios
+  const [formData, setFormData] = useState({
+    name: "",
+    description: "",
+    price: "",
+    duration: ""
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Atualizar o estado quando o serviço mudar
   useEffect(() => {
     if (service) {
-      setName(service.name || "");
-      setDescription(service.description || "");
-      setDuration(service.duration?.toString() || "");
-      setPrice(service.price?.toString() || "");
-      setCategory(service.category || "");
-    } else {
-      // Reset form if service is null (e.g., when modal is closed and re-opened without a service)
-      setName("");
-      setDescription("");
-      setDuration("");
-      setPrice("");
-      setCategory("");
+      setFormData({
+        name: service.name || "",
+        description: service.description || "",
+        price: service.price?.toString() || "",
+        duration: service.duration_minutes?.toString() || ""
+      });
     }
   }, [service]);
 
+  // Se não houver serviço ou o modal não estiver aberto, não renderize nada
+  if (!isOpen || !service) {
+    return null;
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-
-    if (!service || !service.id) {
-      toast.error("Serviço inválido para atualização.");
-      setIsLoading(false);
-      return;
-    }
     
-    if (!name || !duration || !price) {
-      toast.error("Nome, duração e preço são campos obrigatórios.");
-      setIsLoading(false);
+    if (!service?.id) {
+      toast.error("Serviço inválido");
       return;
     }
+
+    setIsSubmitting(true);
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        toast.error("Você precisa estar logado para atualizar um serviço.");
-        setIsLoading(false);
-        return;
-      }
-      const userId = user.id;
-
-      const serviceData = {
-        name,
-        description,
-        duration: parseInt(duration, 10),
-        price: parseFloat(price),
-        category: category || null,
-        // user_id and barbershop_id are typically not updated here,
-        // they are properties of the service linked upon creation.
-        // If they need to be updatable, they should be part of the form.
-      };
-
       const { error } = await supabase
         .from('services')
-        .update(serviceData)
-        .eq('id', service.id)
-        .eq('user_id', userId); // Ensure user can only update their own services
+        .update({
+          name: formData.name,
+          description: formData.description || null,
+          price: parseFloat(formData.price),
+          duration_minutes: parseInt(formData.duration),
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', service.id);
 
-      if (error) {
-        toast.error(error.message || "Erro ao atualizar serviço.");
-        console.error("Error updating service:", error);
-      } else {
-        toast.success("Serviço atualizado com sucesso!");
-        onServiceUpdated(); // Refresh the list in the parent component
-        onClose(); // Close the modal
-      }
+      if (error) throw error;
+
+      toast.success('Serviço atualizado com sucesso!');
+      onSuccess();
+      onClose();
     } catch (error: any) {
-      toast.error("Ocorreu um erro inesperado.");
-      console.error("Unexpected error in handleSubmit:", error);
+      console.error('Error updating service:', error);
+      toast.error(error.message || 'Erro ao atualizar serviço');
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
-  if (!isOpen || !service) return null; // Keep modal closed if no service or not open
+  const handleInputChange = (field: keyof typeof formData) => (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: e.target.value
+    }));
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>Editar Serviço</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit}>
-          <div className="space-y-4 py-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="name">Nome do Serviço</Label>
+            <Input
+              id="name"
+              value={formData.name}
+              onChange={handleInputChange('name')}
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="description">Descrição</Label>
+            <Textarea
+              id="description"
+              value={formData.description}
+              onChange={handleInputChange('description')}
+              placeholder="Descreva o serviço..."
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="edit-name">Nome do Serviço</Label>
+              <Label htmlFor="price">Preço (R$)</Label>
               <Input
-                id="edit-name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Ex: Corte de Cabelo"
+                id="price"
+                type="number"
+                step="0.01"
+                min="0"
+                value={formData.price}
+                onChange={handleInputChange('price')}
                 required
-                disabled={isLoading}
               />
             </div>
-            
             <div className="space-y-2">
-              <Label htmlFor="edit-description">Descrição</Label>
-              <Textarea
-                id="edit-description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Descreva o serviço"
-                // Description might not be strictly required
-                disabled={isLoading}
-              />
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="edit-duration">Duração (minutos)</Label>
-                <Input
-                  id="edit-duration"
-                  type="number"
-                  min="1"
-                  value={duration}
-                  onChange={(e) => setDuration(e.target.value)}
-                  placeholder="Ex: 30"
-                  required
-                  disabled={isLoading}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="edit-price">Preço (R$)</Label>
-                <Input
-                  id="edit-price"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={price}
-                  onChange={(e) => setPrice(e.target.value)}
-                  placeholder="Ex: 35.00"
-                  required
-                  disabled={isLoading}
-                />
-              </div>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="edit-category">Categoria</Label>
+              <Label htmlFor="duration">Duração (minutos)</Label>
               <Input
-                id="edit-category"
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                placeholder="Ex: Cabelo, Barba, Tratamento"
-                disabled={isLoading}
+                id="duration"
+                type="number"
+                min="1"
+                value={formData.duration}
+                onChange={handleInputChange('duration')}
+                required
               />
             </div>
           </div>
-          
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>Cancelar</Button>
-            <Button type="submit" className="bg-barber-gold hover:bg-barber-gold/80" disabled={isLoading}>
-              {isLoading ? "Salvando..." : "Salvar Alterações"}
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancelar
+            </Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? 'Salvando...' : 'Salvar Alterações'}
             </Button>
           </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
   );
-};
+}

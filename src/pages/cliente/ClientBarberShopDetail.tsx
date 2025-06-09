@@ -81,8 +81,8 @@ const ClientBarberShopDetail = () => {
   // baseado no ID da URL
   const barberShop = mockBarberShopDetail;
   
-  // Filtramos os barbeiros que estão ativos
-  const barbers = mockBarbers.filter(barber => barber.status === "active");
+  // Filtrar apenas barbeiros ativos
+  const barbers = mockBarbers.filter(barber => barber.is_active);
 
   return (
     <div className="space-y-6">

@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, TrendingUp, Award } from "lucide-react";
 
@@ -9,12 +8,14 @@ interface BarberMetricsProps {
     status: string;
     todayAppointments: number;
     monthAppointments: number;
+    is_active: boolean;
   }[];
 }
 
 export function BarberMetrics({ barbers }: BarberMetricsProps) {
   // Calculate metrics
-  const activeBarbers = barbers.filter(barber => barber.status === "active").length;
+  const totalBarbers = barbers.length;
+  const activeBarbers = barbers.filter(barber => barber.is_active).length;
   
   const totalMonthlyAppointments = barbers.reduce((sum, barber) => sum + barber.monthAppointments, 0);
   const averageAppointments = activeBarbers ? Math.round(totalMonthlyAppointments / activeBarbers) : 0;

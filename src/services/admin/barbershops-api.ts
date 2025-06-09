@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { BarbershopStats } from '@/types/admin';
 
@@ -38,7 +37,7 @@ export const barbershopsAdminApi = {
       { data: paymentsData, error: paymentsError }
     ] = await Promise.all([
       supabase.from('appointments').select('barbershop_id, client_id').in('barbershop_id', shopIds).not('client_id', 'is', null),
-      supabase.from('barbers').select('barbershop_id, id').in('barbershop_id', shopIds), // Assuming 'id' is barber's primary key
+      supabase.from('barbers').select('barbershop_id, id').in('barbershop_id', shopIds).eq('is_active', true),
       supabase.from('payments').select('barbershop_id, amount').eq('status', 'paid').in('barbershop_id', shopIds)
     ]);
 
