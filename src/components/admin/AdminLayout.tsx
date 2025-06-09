@@ -28,6 +28,7 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
   const navigate = useNavigate();
   const [isSuperUser, setIsSuperUser] = useState<boolean>(false);
   const [loading, setLoading] = useState(true);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   useEffect(() => {
     const checkSuperUser = async () => {
@@ -35,7 +36,7 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
         const { data: { session } } = await supabase.auth.getSession();
         
         if (!session) {
-          navigate('/admin/login');
+          navigate('/login');
           return;
         }
 
@@ -59,12 +60,16 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
 
   const handleLogout = async () => {
     try {
+      setIsLoggingOut(true);
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
-      navigate('/admin/login');
+      toast.success("Você saiu da sua conta");
+      navigate('/login');
     } catch (error) {
       console.error('Error logging out:', error);
       toast.error('Erro ao fazer logout');
+    } finally {
+      setIsLoggingOut(false);
     }
   };
 
@@ -173,10 +178,18 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
         <div className="mt-auto border-t p-4">
           <button
             onClick={handleLogout}
-            className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-red-500 transition-all hover:bg-accent"
+            disabled={isLoggingOut}
+            className={cn(
+              "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-red-500 transition-all hover:bg-accent",
+              isLoggingOut && "opacity-50 cursor-not-allowed"
+            )}
           >
-            <LogOut className="h-4 w-4" />
-            Sair
+            {isLoggingOut ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <LogOut className="h-4 w-4" />
+            )}
+            {isLoggingOut ? "Saindo..." : "Sair"}
           </button>
         </div>
       </aside>
