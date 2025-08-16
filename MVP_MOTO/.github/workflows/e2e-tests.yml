@@ -1,0 +1,369 @@
+# Workflow para Testes E2E
+# Sistema de Gestão de Oficina Mecânica de Motos
+
+name: E2E Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Executar testes diariamente às 2h da manhã
+    - cron: '0 2 * * *'
+
+jobs:
+  # Testes de Fumaça (Smoke Tests)
+  smoke-tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        browser: [chrome, firefox, edge]
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+    
+    - name: Install dependencies
+      run: |
+        cd frontend
+        npm ci
+    
+    - name: Setup test database
+      run: |
+        docker run -d \
+          --name postgres-test \
+          -e POSTGRES_PASSWORD=postgres \
+          -e POSTGRES_DB=oficina_test \
+          -p 5432:5432 \
+          postgres:15
+        
+        # Aguardar banco inicializar
+        sleep 10
+    
+    - name: Start backend
+      run: |
+        cd backend
+        npm ci
+        npm run build
+        NODE_ENV=test npm start &
+        
+        # Aguardar backend inicializar
+        sleep 15
+      env:
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/oficina_test
+    
+    - name: Run smoke tests
+      run: |
+        cd frontend
+        npm run test:smoke
+      env:
+        CYPRESS_baseUrl: http://localhost:3000
+        CYPRESS_apiUrl: http://localhost:3001/api
+    
+    - name: Upload screenshots
+      uses: actions/upload-artifact@v3
+      if: failure()
+      with:
+        name: cypress-screenshots-${{ matrix.browser }}
+        path: frontend/cypress/screenshots
+    
+    - name: Upload videos
+      uses: actions/upload-artifact@v3
+      if: failure()
+      with:
+        name: cypress-videos-${{ matrix.browser }}
+        path: frontend/cypress/videos
+
+  # Testes Completos E2E
+  e2e-tests:
+    runs-on: ubuntu-latest
+    needs: smoke-tests
+    strategy:
+      fail-fast: false
+      matrix:
+        spec:
+          - service-orders.cy.ts
+          - sales.cy.ts
+          - inventory.cy.ts
+          - financial-reports.cy.ts
+        browser: [chrome, firefox]
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+    
+    - name: Install dependencies
+      run: |
+        cd frontend
+        npm ci
+        cd ../backend
+        npm ci
+    
+    - name: Setup test environment
+      run: |
+        # Iniciar banco de dados
+        docker run -d \
+          --name postgres-test \
+          -e POSTGRES_PASSWORD=postgres \
+          -e POSTGRES_DB=oficina_test \
+          -p 5432:5432 \
+          postgres:15
+        
+        # Aguardar banco inicializar
+        sleep 10
+        
+        # Executar migrations
+        cd backend
+        npm run migrate:test
+        npm run seed:test
+    
+    - name: Start application
+      run: |
+        # Iniciar backend
+        cd backend
+        NODE_ENV=test npm start &
+        
+        # Iniciar frontend
+        cd ../frontend
+        npm start &
+        
+        # Aguardar aplicação inicializar
+        sleep 30
+      env:
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/oficina_test
+        PORT: 3001
+        REACT_APP_API_URL: http://localhost:3001/api
+    
+    - name: Run E2E tests
+      run: |
+        cd frontend
+        npx cypress run \
+          --spec "cypress/e2e/${{ matrix.spec }}" \
+          --browser ${{ matrix.browser }} \
+          --record \
+          --parallel
+      env:
+        CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Upload test results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: cypress-results-${{ matrix.spec }}-${{ matrix.browser }}
+        path: |
+          frontend/cypress/screenshots
+          frontend/cypress/videos
+          frontend/cypress/reports
+
+  # Testes de Performance
+  performance-tests:
+    runs-on: ubuntu-latest
+    needs: smoke-tests
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: |
+        cd frontend
+        npm ci
+        npm install -g lighthouse
+    
+    - name: Setup and start application
+      run: |
+        # Setup database
+        docker run -d \
+          --name postgres-test \
+          -e POSTGRES_PASSWORD=postgres \
+          -e POSTGRES_DB=oficina_test \
+          -p 5432:5432 \
+          postgres:15
+        
+        sleep 10
+        
+        # Start backend
+        cd backend
+        npm ci
+        NODE_ENV=test npm start &
+        
+        # Start frontend
+        cd ../frontend
+        npm start &
+        
+        sleep 30
+    
+    - name: Run Lighthouse
+      run: |
+        lighthouse http://localhost:3000 \
+          --output=json \
+          --output-path=./lighthouse-report.json \
+          --chrome-flags="--headless --no-sandbox"
+    
+    - name: Upload Lighthouse report
+      uses: actions/upload-artifact@v3
+      with:
+        name: lighthouse-report
+        path: lighthouse-report.json
+
+  # Testes de Acessibilidade
+  accessibility-tests:
+    runs-on: ubuntu-latest
+    needs: smoke-tests
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: |
+        cd frontend
+        npm ci
+    
+    - name: Setup and start application
+      run: |
+        # Setup database
+        docker run -d \
+          --name postgres-test \
+          -e POSTGRES_PASSWORD=postgres \
+          -e POSTGRES_DB=oficina_test \
+          -p 5432:5432 \
+          postgres:15
+        
+        sleep 10
+        
+        # Start backend
+        cd backend
+        npm ci
+        NODE_ENV=test npm start &
+        
+        # Start frontend
+        cd ../frontend
+        npm start &
+        
+        sleep 30
+    
+    - name: Run accessibility tests
+      run: |
+        cd frontend
+        npx cypress run \
+          --spec "cypress/e2e/accessibility/**/*" \
+          --browser chrome
+    
+    - name: Upload accessibility results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: accessibility-results
+        path: |
+          frontend/cypress/screenshots
+          frontend/cypress/reports
+
+  # Relatório de Resultados
+  test-report:
+    runs-on: ubuntu-latest
+    needs: [smoke-tests, e2e-tests, performance-tests, accessibility-tests]
+    if: always()
+    
+    steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v3
+    
+    - name: Generate test report
+      run: |
+        echo "# Relatório de Testes E2E" > test-report.md
+        echo "" >> test-report.md
+        echo "## Resumo dos Testes" >> test-report.md
+        echo "" >> test-report.md
+        
+        # Verificar status dos jobs
+        if [ "${{ needs.smoke-tests.result }}" == "success" ]; then
+          echo "✅ Testes de Fumaça: PASSOU" >> test-report.md
+        else
+          echo "❌ Testes de Fumaça: FALHOU" >> test-report.md
+        fi
+        
+        if [ "${{ needs.e2e-tests.result }}" == "success" ]; then
+          echo "✅ Testes E2E: PASSOU" >> test-report.md
+        else
+          echo "❌ Testes E2E: FALHOU" >> test-report.md
+        fi
+        
+        if [ "${{ needs.performance-tests.result }}" == "success" ]; then
+          echo "✅ Testes de Performance: PASSOU" >> test-report.md
+        else
+          echo "❌ Testes de Performance: FALHOU" >> test-report.md
+        fi
+        
+        if [ "${{ needs.accessibility-tests.result }}" == "success" ]; then
+          echo "✅ Testes de Acessibilidade: PASSOU" >> test-report.md
+        else
+          echo "❌ Testes de Acessibilidade: FALHOU" >> test-report.md
+        fi
+        
+        echo "" >> test-report.md
+        echo "## Detalhes" >> test-report.md
+        echo "- **Commit:** ${{ github.sha }}" >> test-report.md
+        echo "- **Branch:** ${{ github.ref_name }}" >> test-report.md
+        echo "- **Executado em:** $(date)" >> test-report.md
+    
+    - name: Upload test report
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-report
+        path: test-report.md
+    
+    - name: Comment PR
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fs = require('fs');
+          const report = fs.readFileSync('test-report.md', 'utf8');
+          
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: report
+          });
+
+  # Cleanup
+  cleanup:
+    runs-on: ubuntu-latest
+    needs: [smoke-tests, e2e-tests, performance-tests, accessibility-tests]
+    if: always()
+    
+    steps:
+    - name: Cleanup Docker containers
+      run: |
+        docker stop postgres-test || true
+        docker rm postgres-test || true

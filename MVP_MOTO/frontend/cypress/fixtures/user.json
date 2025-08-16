@@ -1,0 +1,25 @@
+{
+  "id": "1",
+  "name": "Admin Teste",
+  "email": "admin@oficina.com",
+  "role": "admin",
+  "permissions": [
+    "clients:read",
+    "clients:write",
+    "products:read",
+    "products:write",
+    "service_orders:read",
+    "service_orders:write",
+    "sales:read",
+    "sales:write",
+    "inventory:read",
+    "inventory:write",
+    "financial:read",
+    "financial:write",
+    "reports:read",
+    "config:read",
+    "config:write"
+  ],
+  "createdAt": "2024-01-01T00:00:00.000Z",
+  "updatedAt": "2024-01-01T00:00:00.000Z"
+}

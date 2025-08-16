@@ -38,6 +38,26 @@ const Icons = {
       <circle cx="20" cy="19" r="1" />
     </svg>
   ),
+  Calendar: () => (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+    </svg>
+  ),
+  Receipt: () => (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5l-5-5 4-4 5 5v6a2 2 0 01-2 2H6a2 2 0 01-2-2V4a2 2 0 012-2h7l5 5v11z" />
+    </svg>
+  ),
+  Filter: () => (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+    </svg>
+  ),
+  Download: () => (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+    </svg>
+  ),
   Plus: () => (
     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -324,6 +344,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
     { path: '/vehicles', label: 'Veículos', icon: Icons.Motorcycle, badge: null },
     { path: '/service-orders', label: 'Ordens de Serviço', icon: Icons.Tool, badge: '3' },
     { path: '/sales', label: 'Vendas', icon: Icons.ShoppingCart, badge: null },
+    { path: '/financial', label: 'Financeiro', icon: Icons.CreditCard, badge: null },
   ];
 
   return (
@@ -5910,6 +5931,1216 @@ const SalesPage = () => {
   );
 };
 
+// Página Financeira Completa
+const FinancialPage = () => {
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [showAccountsPayableModal, setShowAccountsPayableModal] = useState(false);
+  const [showAccountsReceivableModal, setShowAccountsReceivableModal] = useState(false);
+  const [showCashMovementModal, setShowCashMovementModal] = useState(false);
+  const [showReceiptModal, setShowReceiptModal] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [dateFilter, setDateFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
+
+  // Mock data para demonstração
+  const financialSummary = {
+    totalReceivable: 15750.00,
+    totalPayable: 8500.00,
+    cashBalance: 12300.00,
+    monthlyRevenue: 45200.00,
+    monthlyExpenses: 28900.00,
+    netProfit: 16300.00
+  };
+
+  const accountsReceivable = [
+    {
+      id: 'AR001',
+      clientName: 'João Silva',
+      description: 'Venda #V001 - Peças e serviços',
+      amount: 850.00,
+      dueDate: '2024-01-25',
+      status: 'Pendente',
+      saleId: 'V001',
+      createdAt: '2024-01-15'
+    },
+    {
+      id: 'AR002',
+      clientName: 'Maria Santos',
+      description: 'OS #OS002 - Revisão completa',
+      amount: 1200.00,
+      dueDate: '2024-01-30',
+      status: 'Vencida',
+      saleId: 'OS002',
+      createdAt: '2024-01-10'
+    },
+    {
+      id: 'AR003',
+      clientName: 'Carlos Lima',
+      description: 'Venda #V003 - Pneus novos',
+      amount: 650.00,
+      dueDate: '2024-02-05',
+      status: 'Pendente',
+      saleId: 'V003',
+      createdAt: '2024-01-20'
+    }
+  ];
+
+  const accountsPayable = [
+    {
+      id: 'AP001',
+      supplierName: 'Distribuidora Peças Ltda',
+      description: 'Compra de peças - NF 12345',
+      amount: 2500.00,
+      dueDate: '2024-01-28',
+      status: 'Pendente',
+      category: 'Estoque',
+      createdAt: '2024-01-18'
+    },
+    {
+      id: 'AP002',
+      supplierName: 'Energia Elétrica S.A.',
+      description: 'Conta de luz - Janeiro/2024',
+      amount: 450.00,
+      dueDate: '2024-01-20',
+      status: 'Pago',
+      category: 'Utilidades',
+      createdAt: '2024-01-05'
+    },
+    {
+      id: 'AP003',
+      supplierName: 'Auto Peças Premium',
+      description: 'Compra de filtros e óleos',
+      amount: 1800.00,
+      dueDate: '2024-02-02',
+      status: 'Pendente',
+      category: 'Estoque',
+      createdAt: '2024-01-22'
+    }
+  ];
+
+  const cashMovements = [
+    {
+      id: 'CM001',
+      type: 'Entrada',
+      amount: 850.00,
+      description: 'Recebimento - João Silva (AR001)',
+      date: '2024-01-24',
+      category: 'Vendas',
+      referenceId: 'AR001'
+    },
+    {
+      id: 'CM002',
+      type: 'Saída',
+      amount: 450.00,
+      description: 'Pagamento conta de luz',
+      date: '2024-01-20',
+      category: 'Utilidades',
+      referenceId: 'AP002'
+    },
+    {
+      id: 'CM003',
+      type: 'Entrada',
+      amount: 1200.00,
+      description: 'Venda à vista - Cliente balcão',
+      date: '2024-01-23',
+      category: 'Vendas',
+      referenceId: 'V004'
+    }
+  ];
+
+  const handleAccountsPayableSubmit = (data: any) => {
+    console.log('Nova conta a pagar:', data);
+    alert('Conta a pagar registrada com sucesso!');
+    setShowAccountsPayableModal(false);
+  };
+
+  const handleAccountsReceivableSubmit = (data: any) => {
+    console.log('Nova conta a receber:', data);
+    alert('Conta a receber registrada com sucesso!');
+    setShowAccountsReceivableModal(false);
+  };
+
+  const handleCashMovementSubmit = (data: any) => {
+    console.log('Novo movimento de caixa:', data);
+    alert('Movimento de caixa registrado com sucesso!');
+    setShowCashMovementModal(false);
+  };
+
+  const getStatusBadge = (status: string) => {
+    const badges = {
+      'Pendente': 'bg-yellow-100 text-yellow-800',
+      'Pago': 'bg-green-100 text-green-800',
+      'Vencida': 'bg-red-100 text-red-800',
+      'Recebido': 'bg-green-100 text-green-800'
+    };
+    return badges[status as keyof typeof badges] || 'bg-gray-100 text-gray-800';
+  };
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(value);
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('pt-BR');
+  };
+
+  return (
+    <div className="px-4 sm:px-6 lg:px-8 py-8">
+      {/* Header */}
+      <div className="mb-8">
+        <div className="bg-gradient-to-r from-green-600 via-green-700 to-emerald-700 rounded-2xl shadow-xl p-8 text-white">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <div className="p-3 bg-white bg-opacity-20 rounded-2xl backdrop-blur-sm mr-6">
+                <Icons.CreditCard className="h-8 w-8" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold">Gestão Financeira</h1>
+                <p className="text-green-100 mt-2">Controle completo das finanças da oficina</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <p className="text-green-100 text-sm">Saldo atual</p>
+              <p className="text-2xl font-bold">{formatCurrency(financialSummary.cashBalance)}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Resumo Financeiro */}
+      <div className="mb-8">
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">Resumo Financeiro</h2>
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-200">
+              <div className="flex items-center">
+                <div className="p-3 bg-blue-500 rounded-lg">
+                  <Icons.TrendingUp className="h-6 w-6 text-white" />
+                </div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-blue-600">Contas a Receber</p>
+                  <p className="text-2xl font-bold text-blue-900">{formatCurrency(financialSummary.totalReceivable)}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-xl p-6 border border-red-200">
+              <div className="flex items-center">
+                <div className="p-3 bg-red-500 rounded-lg">
+                  <Icons.TrendingDown className="h-6 w-6 text-white" />
+                </div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-red-600">Contas a Pagar</p>
+                  <p className="text-2xl font-bold text-red-900">{formatCurrency(financialSummary.totalPayable)}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6 border border-green-200">
+              <div className="flex items-center">
+                <div className="p-3 bg-green-500 rounded-lg">
+                  <Icons.Cash className="h-6 w-6 text-white" />
+                </div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-green-600">Lucro Líquido</p>
+                  <p className="text-2xl font-bold text-green-900">{formatCurrency(financialSummary.netProfit)}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Tabs de Navegação */}
+      <div className="mb-8">
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-2">
+          <nav className="flex space-x-2">
+            {[
+              { id: 'dashboard', label: 'Dashboard', icon: Icons.Dashboard },
+              { id: 'receivable', label: 'Contas a Receber', icon: Icons.TrendingUp },
+              { id: 'payable', label: 'Contas a Pagar', icon: Icons.TrendingDown },
+              { id: 'cash', label: 'Movimento de Caixa', icon: Icons.Cash },
+              { id: 'reports', label: 'Relatórios', icon: Icons.Receipt }
+            ].map((tab) => {
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
+                    activeTab === tab.id
+                      ? 'bg-indigo-600 text-white shadow-lg'
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                  }`}
+                >
+                  <Icon className="h-4 w-4 mr-2" />
+                  {tab.label}
+                </button>
+              );
+            })}
+          </nav>
+        </div>
+      </div>
+
+      {/* Conteúdo das Tabs */}
+      {activeTab === 'dashboard' && (
+        <div className="space-y-8">
+          {/* Gráfico de Fluxo de Caixa */}
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
+            <h3 className="text-xl font-bold text-gray-900 mb-6">Fluxo de Caixa - Últimos 30 dias</h3>
+            <div className="h-64 bg-gray-50 rounded-lg flex items-center justify-center">
+              <div className="text-center">
+                <Icons.TrendingUp className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-500">Gráfico de fluxo de caixa</p>
+                <p className="text-sm text-gray-400">Integração com biblioteca de gráficos</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Ações Rápidas */}
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
+            <h3 className="text-xl font-bold text-gray-900 mb-6">Ações Rápidas</h3>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <button
+                onClick={() => setShowAccountsReceivableModal(true)}
+                className="flex items-center p-4 bg-blue-50 rounded-xl hover:bg-blue-100 transition-colors"
+              >
+                <Icons.Plus className="h-5 w-5 text-blue-600 mr-3" />
+                <span className="text-blue-900 font-medium">Nova Conta a Receber</span>
+              </button>
+              <button
+                onClick={() => setShowAccountsPayableModal(true)}
+                className="flex items-center p-4 bg-red-50 rounded-xl hover:bg-red-100 transition-colors"
+              >
+                <Icons.Plus className="h-5 w-5 text-red-600 mr-3" />
+                <span className="text-red-900 font-medium">Nova Conta a Pagar</span>
+              </button>
+              <button
+                onClick={() => setShowCashMovementModal(true)}
+                className="flex items-center p-4 bg-green-50 rounded-xl hover:bg-green-100 transition-colors"
+              >
+                <Icons.Plus className="h-5 w-5 text-green-600 mr-3" />
+                <span className="text-green-900 font-medium">Movimento de Caixa</span>
+              </button>
+              <button
+                onClick={() => setShowReceiptModal(true)}
+                className="flex items-center p-4 bg-purple-50 rounded-xl hover:bg-purple-100 transition-colors"
+              >
+                <Icons.Receipt className="h-5 w-5 text-purple-600 mr-3" />
+                <span className="text-purple-900 font-medium">Gerar Recibo</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'receivable' && (
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-xl font-bold text-gray-900">Contas a Receber</h3>
+            <button
+              onClick={() => setShowAccountsReceivableModal(true)}
+              className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+            >
+              <Icons.Plus className="h-4 w-4 mr-2" />
+              Nova Conta
+            </button>
+          </div>
+
+          {/* Filtros */}
+          <div className="mb-6 flex flex-wrap gap-4">
+            <div className="flex-1 min-w-64">
+              <input
+                type="text"
+                placeholder="Buscar por cliente ou descrição..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              />
+            </div>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            >
+              <option value="all">Todos os status</option>
+              <option value="Pendente">Pendente</option>
+              <option value="Vencida">Vencida</option>
+              <option value="Recebido">Recebido</option>
+            </select>
+          </div>
+
+          {/* Tabela */}
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descrição</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vencimento</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {accountsReceivable.map((account) => (
+                  <tr key={account.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">{account.clientName}</div>
+                      <div className="text-sm text-gray-500">ID: {account.id}</div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="text-sm text-gray-900">{account.description}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">{formatCurrency(account.amount)}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">{formatDate(account.dueDate)}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusBadge(account.status)}`}>
+                        {account.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <button className="text-indigo-600 hover:text-indigo-900 mr-4">Receber</button>
+                      <button className="text-gray-600 hover:text-gray-900">Editar</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'payable' && (
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-xl font-bold text-gray-900">Contas a Pagar</h3>
+            <button
+              onClick={() => setShowAccountsPayableModal(true)}
+              className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+            >
+              <Icons.Plus className="h-4 w-4 mr-2" />
+              Nova Conta
+            </button>
+          </div>
+
+          {/* Tabela */}
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fornecedor</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descrição</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vencimento</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {accountsPayable.map((account) => (
+                  <tr key={account.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">{account.supplierName}</div>
+                      <div className="text-sm text-gray-500">ID: {account.id}</div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="text-sm text-gray-900">{account.description}</div>
+                      <div className="text-sm text-gray-500">{account.category}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">{formatCurrency(account.amount)}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">{formatDate(account.dueDate)}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusBadge(account.status)}`}>
+                        {account.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <button className="text-indigo-600 hover:text-indigo-900 mr-4">Pagar</button>
+                      <button className="text-gray-600 hover:text-gray-900">Editar</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'cash' && (
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-xl font-bold text-gray-900">Movimento de Caixa</h3>
+            <button
+              onClick={() => setShowCashMovementModal(true)}
+              className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+            >
+              <Icons.Plus className="h-4 w-4 mr-2" />
+              Novo Movimento
+            </button>
+          </div>
+
+          {/* Tabela */}
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descrição</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoria</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {cashMovements.map((movement) => (
+                  <tr key={movement.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">{formatDate(movement.date)}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                        movement.type === 'Entrada' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                      }`}>
+                        {movement.type}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="text-sm text-gray-900">{movement.description}</div>
+                      <div className="text-sm text-gray-500">ID: {movement.id}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">{movement.category}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className={`text-sm font-medium ${
+                        movement.type === 'Entrada' ? 'text-green-600' : 'text-red-600'
+                      }`}>
+                        {movement.type === 'Entrada' ? '+' : '-'} {formatCurrency(movement.amount)}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <button className="text-indigo-600 hover:text-indigo-900 mr-4">Ver detalhes</button>
+                      <button className="text-gray-600 hover:text-gray-900">Editar</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'reports' && (
+        <div className="space-y-8">
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
+            <h3 className="text-xl font-bold text-gray-900 mb-6">Relatórios Financeiros</h3>
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="border border-gray-200 rounded-xl p-6 hover:shadow-lg transition-shadow">
+                <div className="flex items-center mb-4">
+                  <Icons.TrendingUp className="h-8 w-8 text-blue-600 mr-3" />
+                  <h4 className="text-lg font-semibold text-gray-900">Fluxo de Caixa</h4>
+                </div>
+                <p className="text-gray-600 mb-4">Relatório detalhado de entradas e saídas por período</p>
+                <button className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700">
+                  Gerar Relatório
+                </button>
+              </div>
+
+              <div className="border border-gray-200 rounded-xl p-6 hover:shadow-lg transition-shadow">
+                <div className="flex items-center mb-4">
+                  <Icons.Receipt className="h-8 w-8 text-green-600 mr-3" />
+                  <h4 className="text-lg font-semibold text-gray-900">Contas a Receber</h4>
+                </div>
+                <p className="text-gray-600 mb-4">Relatório de contas em aberto e recebimentos</p>
+                <button className="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700">
+                  Gerar Relatório
+                </button>
+              </div>
+
+              <div className="border border-gray-200 rounded-xl p-6 hover:shadow-lg transition-shadow">
+                <div className="flex items-center mb-4">
+                  <Icons.TrendingDown className="h-8 w-8 text-red-600 mr-3" />
+                  <h4 className="text-lg font-semibold text-gray-900">Contas a Pagar</h4>
+                </div>
+                <p className="text-gray-600 mb-4">Relatório de obrigações e pagamentos realizados</p>
+                <button className="w-full bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700">
+                  Gerar Relatório
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modais */}
+      <AccountsPayableModal
+        isOpen={showAccountsPayableModal}
+        onClose={() => setShowAccountsPayableModal(false)}
+        onSubmit={handleAccountsPayableSubmit}
+      />
+
+      <AccountsReceivableModal
+        isOpen={showAccountsReceivableModal}
+        onClose={() => setShowAccountsReceivableModal(false)}
+        onSubmit={handleAccountsReceivableSubmit}
+      />
+
+      <CashMovementModal
+        isOpen={showCashMovementModal}
+        onClose={() => setShowCashMovementModal(false)}
+        onSubmit={handleCashMovementSubmit}
+      />
+
+      <ReceiptModal
+        isOpen={showReceiptModal}
+        onClose={() => setShowReceiptModal(false)}
+      />
+    </div>
+  );
+};
+
+// Modal para Contas a Pagar
+const AccountsPayableModal = ({ isOpen, onClose, onSubmit }: {
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (data: any) => void;
+}) => {
+  const [formData, setFormData] = useState({
+    supplierName: '',
+    description: '',
+    amount: '',
+    dueDate: '',
+    category: '',
+    notes: ''
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const accountData = {
+      ...formData,
+      id: `AP${String(Date.now()).slice(-3)}`,
+      amount: parseFloat(formData.amount),
+      status: 'Pendente',
+      createdAt: new Date().toISOString()
+    };
+    onSubmit(accountData);
+    setFormData({
+      supplierName: '',
+      description: '',
+      amount: '',
+      dueDate: '',
+      category: '',
+      notes: ''
+    });
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <Modal isOpen={isOpen} onClose={onClose} title="Nova Conta a Pagar" size="lg">
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Fornecedor *
+            </label>
+            <input
+              type="text"
+              name="supplierName"
+              required
+              value={formData.supplierName}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              placeholder="Nome do fornecedor"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Categoria *
+            </label>
+            <select
+              name="category"
+              required
+              value={formData.category}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            >
+              <option value="">Selecione uma categoria</option>
+              <option value="Estoque">Estoque</option>
+              <option value="Utilidades">Utilidades</option>
+              <option value="Equipamentos">Equipamentos</option>
+              <option value="Serviços">Serviços</option>
+              <option value="Impostos">Impostos</option>
+              <option value="Outros">Outros</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Descrição *
+          </label>
+          <input
+            type="text"
+            name="description"
+            required
+            value={formData.description}
+            onChange={handleChange}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            placeholder="Descrição da conta"
+          />
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Valor (R$) *
+            </label>
+            <input
+              type="number"
+              name="amount"
+              required
+              min="0"
+              step="0.01"
+              value={formData.amount}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              placeholder="0,00"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Data de Vencimento *
+            </label>
+            <input
+              type="date"
+              name="dueDate"
+              required
+              value={formData.dueDate}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Observações
+          </label>
+          <textarea
+            name="notes"
+            rows={3}
+            value={formData.notes}
+            onChange={handleChange}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            placeholder="Observações adicionais..."
+          />
+        </div>
+
+        <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700"
+          >
+            Salvar Conta
+          </button>
+        </div>
+      </form>
+    </Modal>
+  );
+};
+
+// Modal para Contas a Receber
+const AccountsReceivableModal = ({ isOpen, onClose, onSubmit }: {
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (data: any) => void;
+}) => {
+  const [formData, setFormData] = useState({
+    clientName: '',
+    description: '',
+    amount: '',
+    dueDate: '',
+    saleId: '',
+    notes: ''
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const accountData = {
+      ...formData,
+      id: `AR${String(Date.now()).slice(-3)}`,
+      amount: parseFloat(formData.amount),
+      status: 'Pendente',
+      createdAt: new Date().toISOString()
+    };
+    onSubmit(accountData);
+    setFormData({
+      clientName: '',
+      description: '',
+      amount: '',
+      dueDate: '',
+      saleId: '',
+      notes: ''
+    });
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <Modal isOpen={isOpen} onClose={onClose} title="Nova Conta a Receber" size="lg">
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Cliente *
+            </label>
+            <input
+              type="text"
+              name="clientName"
+              required
+              value={formData.clientName}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              placeholder="Nome do cliente"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              ID da Venda/OS
+            </label>
+            <input
+              type="text"
+              name="saleId"
+              value={formData.saleId}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              placeholder="V001, OS001, etc."
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Descrição *
+          </label>
+          <input
+            type="text"
+            name="description"
+            required
+            value={formData.description}
+            onChange={handleChange}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            placeholder="Descrição da conta"
+          />
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Valor (R$) *
+            </label>
+            <input
+              type="number"
+              name="amount"
+              required
+              min="0"
+              step="0.01"
+              value={formData.amount}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              placeholder="0,00"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Data de Vencimento *
+            </label>
+            <input
+              type="date"
+              name="dueDate"
+              required
+              value={formData.dueDate}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Observações
+          </label>
+          <textarea
+            name="notes"
+            rows={3}
+            value={formData.notes}
+            onChange={handleChange}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            placeholder="Observações adicionais..."
+          />
+        </div>
+
+        <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700"
+          >
+            Salvar Conta
+          </button>
+        </div>
+      </form>
+    </Modal>
+  );
+};
+
+// Modal para Movimento de Caixa
+const CashMovementModal = ({ isOpen, onClose, onSubmit }: {
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (data: any) => void;
+}) => {
+  const [formData, setFormData] = useState({
+    type: 'Entrada',
+    amount: '',
+    description: '',
+    category: '',
+    referenceId: '',
+    notes: ''
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const movementData = {
+      ...formData,
+      id: `CM${String(Date.now()).slice(-3)}`,
+      amount: parseFloat(formData.amount),
+      date: new Date().toISOString().split('T')[0],
+      createdAt: new Date().toISOString()
+    };
+    onSubmit(movementData);
+    setFormData({
+      type: 'Entrada',
+      amount: '',
+      description: '',
+      category: '',
+      referenceId: '',
+      notes: ''
+    });
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <Modal isOpen={isOpen} onClose={onClose} title="Novo Movimento de Caixa" size="lg">
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Tipo *
+            </label>
+            <select
+              name="type"
+              required
+              value={formData.type}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            >
+              <option value="Entrada">Entrada</option>
+              <option value="Saída">Saída</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Categoria *
+            </label>
+            <select
+              name="category"
+              required
+              value={formData.category}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            >
+              <option value="">Selecione uma categoria</option>
+              <option value="Vendas">Vendas</option>
+              <option value="Serviços">Serviços</option>
+              <option value="Estoque">Estoque</option>
+              <option value="Utilidades">Utilidades</option>
+              <option value="Equipamentos">Equipamentos</option>
+              <option value="Impostos">Impostos</option>
+              <option value="Outros">Outros</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Descrição *
+          </label>
+          <input
+            type="text"
+            name="description"
+            required
+            value={formData.description}
+            onChange={handleChange}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            placeholder="Descrição do movimento"
+          />
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Valor (R$) *
+            </label>
+            <input
+              type="number"
+              name="amount"
+              required
+              min="0"
+              step="0.01"
+              value={formData.amount}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              placeholder="0,00"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              ID de Referência
+            </label>
+            <input
+              type="text"
+              name="referenceId"
+              value={formData.referenceId}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              placeholder="V001, OS001, AR001, etc."
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Observações
+          </label>
+          <textarea
+            name="notes"
+            rows={3}
+            value={formData.notes}
+            onChange={handleChange}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            placeholder="Observações adicionais..."
+          />
+        </div>
+
+        <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700"
+          >
+            Salvar Movimento
+          </button>
+        </div>
+      </form>
+    </Modal>
+  );
+};
+
+// Modal para Gerar Recibo
+const ReceiptModal = ({ isOpen, onClose }: {
+  isOpen: boolean;
+  onClose: () => void;
+}) => {
+  const [formData, setFormData] = useState({
+    clientName: '',
+    amount: '',
+    description: '',
+    paymentMethod: 'Dinheiro',
+    referenceId: ''
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log('Gerando recibo:', formData);
+    alert('Recibo gerado com sucesso!');
+    onClose();
+    setFormData({
+      clientName: '',
+      amount: '',
+      description: '',
+      paymentMethod: 'Dinheiro',
+      referenceId: ''
+    });
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <Modal isOpen={isOpen} onClose={onClose} title="Gerar Recibo" size="lg">
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Cliente *
+            </label>
+            <input
+              type="text"
+              name="clientName"
+              required
+              value={formData.clientName}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              placeholder="Nome do cliente"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Valor (R$) *
+            </label>
+            <input
+              type="number"
+              name="amount"
+              required
+              min="0"
+              step="0.01"
+              value={formData.amount}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              placeholder="0,00"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Descrição *
+          </label>
+          <textarea
+            name="description"
+            required
+            rows={3}
+            value={formData.description}
+            onChange={handleChange}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            placeholder="Descrição dos serviços/produtos..."
+          />
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Forma de Pagamento *
+            </label>
+            <select
+              name="paymentMethod"
+              required
+              value={formData.paymentMethod}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            >
+              <option value="Dinheiro">Dinheiro</option>
+              <option value="Cartão de Crédito">Cartão de Crédito</option>
+              <option value="Cartão de Débito">Cartão de Débito</option>
+              <option value="PIX">PIX</option>
+              <option value="Transferência">Transferência</option>
+              <option value="Cheque">Cheque</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              ID de Referência
+            </label>
+            <input
+              type="text"
+              name="referenceId"
+              value={formData.referenceId}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              placeholder="V001, OS001, etc."
+            />
+          </div>
+        </div>
+
+        <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700"
+          >
+            Gerar e Imprimir Recibo
+          </button>
+        </div>
+      </form>
+    </Modal>
+  );
+};
+
 // Componente principal da aplicação
 const App = () => {
   return (
@@ -5921,6 +7152,7 @@ const App = () => {
       <Route path="/vehicles" element={<AppLayout><VehiclesPage /></AppLayout>} />
       <Route path="/service-orders" element={<AppLayout><ServiceOrdersPage /></AppLayout>} />
       <Route path="/sales" element={<AppLayout><SalesPage /></AppLayout>} />
+      <Route path="/financial" element={<AppLayout><FinancialPage /></AppLayout>} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

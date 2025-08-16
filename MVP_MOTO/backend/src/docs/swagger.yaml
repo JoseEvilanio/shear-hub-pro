@@ -1,0 +1,17 @@
+# Documentação da API - Sistema de Gestão de Oficina Mecânica de Motos
+# OpenAPI 3.0 Specification
+
+openapi: 3.0.3
+info:
+  title: Sistema de Gestão de Oficina Mecânica de Motos
+  description: |
+    API completa para gerenciamento de oficina mecânica especializada em motocicletas.
+    
+    ## Funcionalidades Principais
+    - Gestão de clientes e veículos
+    - Ordens de serviço e agendamentos
+    - Controle de estoque e produtos
+    - Sistema de vendas e orçamentos
+    - Gestão financeira e relatórios
+    - Sistema de notificações
+    - Auditoria e logs

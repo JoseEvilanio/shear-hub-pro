@@ -1,0 +1,51 @@
+{
+  "name": "oficina-motos-reports",
+  "version": "1.0.0",
+  "description": "Sistema de relatórios para Sistema de Gestão de Oficina de Motos",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "generate-report": "node scripts/generate-report.js",
+    "monthly-reports": "node scripts/monthly-reports.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^6.3.3",
+    "eslint": "^8.55.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "collectCoverageFrom": [
+      "**/*.js",
+      "!**/node_modules/**",
+      "!**/tests/**",
+      "!**/coverage/**",
+      "!**/scripts/**"
+    ],
+    "coverageReporters": [
+      "text",
+      "lcov",
+      "html"
+    ],
+    "testMatch": [
+      "**/tests/**/*.test.js"
+    ]
+  },
+  "keywords": [
+    "reports",
+    "analytics",
+    "dashboard",
+    "oficina",
+    "motos",
+    "business-intelligence"
+  ],
+  "author": "Sistema de Gestão de Oficina",
+  "license": "MIT"
+}

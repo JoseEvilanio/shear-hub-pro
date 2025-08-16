@@ -1,0 +1,56 @@
+{
+  "name": "oficina-motos-printing",
+  "version": "1.0.0",
+  "description": "Sistema de impressão para Sistema de Gestão de Oficina de Motos",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "cleanup": "node scripts/cleanup.js",
+    "test-print": "node scripts/test-print.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  },
+  "dependencies": {
+    "pdfkit": "^0.14.0",
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^6.3.3",
+    "eslint": "^8.55.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "collectCoverageFrom": [
+      "**/*.js",
+      "!**/node_modules/**",
+      "!**/tests/**",
+      "!**/coverage/**",
+      "!**/output/**",
+      "!**/templates/**",
+      "!**/scripts/**"
+    ],
+    "coverageReporters": [
+      "text",
+      "lcov",
+      "html"
+    ],
+    "testMatch": [
+      "**/tests/**/*.test.js"
+    ]
+  },
+  "keywords": [
+    "printing",
+    "pdf",
+    "receipt",
+    "thermal",
+    "matrix",
+    "oficina",
+    "motos",
+    "documents"
+  ],
+  "author": "Sistema de Gestão de Oficina",
+  "license": "MIT"
+}

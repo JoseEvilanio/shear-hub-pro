@@ -1,0 +1,65 @@
+{
+  "data": {
+    "items": [
+      {
+        "id": "1",
+        "name": "João Silva",
+        "email": "joao@email.com",
+        "phone": "(11) 99999-9999",
+        "cpf": "123.456.789-00",
+        "address": "Rua das Flores, 123",
+        "city": "São Paulo",
+        "state": "SP",
+        "zipCode": "01234-567",
+        "birthDate": "1985-05-15",
+        "createdAt": "2024-01-01T00:00:00.000Z",
+        "updatedAt": "2024-01-01T00:00:00.000Z",
+        "serviceOrdersCount": 5,
+        "totalSpent": 2500.00,
+        "lastServiceDate": "2024-01-15T00:00:00.000Z"
+      },
+      {
+        "id": "2",
+        "name": "Maria Santos",
+        "email": "maria@email.com",
+        "phone": "(11) 88888-8888",
+        "cpf": "987.654.321-00",
+        "address": "Av. Principal, 456",
+        "city": "São Paulo",
+        "state": "SP",
+        "zipCode": "01234-890",
+        "birthDate": "1990-08-22",
+        "createdAt": "2024-01-02T00:00:00.000Z",
+        "updatedAt": "2024-01-02T00:00:00.000Z",
+        "serviceOrdersCount": 3,
+        "totalSpent": 1800.00,
+        "lastServiceDate": "2024-01-10T00:00:00.000Z"
+      },
+      {
+        "id": "3",
+        "name": "Pedro Oliveira",
+        "email": "pedro@email.com",
+        "phone": "(11) 77777-7777",
+        "cpf": "456.789.123-00",
+        "address": "Rua do Comércio, 789",
+        "city": "São Paulo",
+        "state": "SP",
+        "zipCode": "01234-123",
+        "birthDate": "1988-12-03",
+        "createdAt": "2024-01-03T00:00:00.000Z",
+        "updatedAt": "2024-01-03T00:00:00.000Z",
+        "serviceOrdersCount": 8,
+        "totalSpent": 4200.00,
+        "lastServiceDate": "2024-01-20T00:00:00.000Z"
+      }
+    ],
+    "pagination": {
+      "page": 1,
+      "limit": 20,
+      "total": 3,
+      "totalPages": 1,
+      "hasNext": false,
+      "hasPrev": false
+    }
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "name": "oficina-motos-database",
+  "version": "1.0.0",
+  "description": "Configuração e scripts do banco de dados PostgreSQL para Sistema de Gestão de Oficina de Motos",
+  "main": "connection.js",
+  "scripts": {
+    "setup": "node setup.js",
+    "test-connection": "node -e \"require('./connection').testConnection().then(() => process.exit(0)).catch(() => process.exit(1))\"",
+    "migrate": "node -e \"require('./connection').runMigrations().then(() => process.exit(0)).catch(() => process.exit(1))\"",
+    "seed": "node -e \"require('./connection').runSeeds().then(() => process.exit(0)).catch(() => process.exit(1))\"",
+    "init": "node -e \"require('./connection').initializeDatabase().then(() => process.exit(0)).catch(() => process.exit(1))\"",
+    "reset": "node -e \"require('./setup').resetDatabase().then(() => process.exit(0)).catch(() => process.exit(1))\"",
+    "backup": "pg_dump $DB_NAME > backups/backup_$(date +%Y%m%d_%H%M%S).sql",
+    "restore": "psql $DB_NAME < $1"
+  },
+  "dependencies": {
+    "pg": "^8.11.3",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "keywords": [
+    "postgresql",
+    "database",
+    "oficina",
+    "motos",
+    "migrations",
+    "seeds"
+  ],
+  "author": "Sistema de Gestão de Oficina",
+  "license": "MIT",
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oficina-motos/database.git"
+  },
+  "bugs": {
+    "url": "https://github.com/oficina-motos/database/issues"
+  },
+  "homepage": "https://github.com/oficina-motos/database#readme"
+}

@@ -1,0 +1,60 @@
+{
+  "name": "sistema-gestao-oficina-motos",
+  "version": "1.0.0",
+  "description": "Sistema completo de gestão para oficinas mecânicas de motos",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "build": "npm run build:backend && npm run build:frontend",
+    "build:backend": "cd backend && npm run build",
+    "build:frontend": "cd frontend && npm run build",
+    "test": "npm run test:backend && npm run test:frontend",
+    "test:backend": "cd backend && npm test",
+    "test:frontend": "cd frontend && npm test",
+    "lint": "npm run lint:backend && npm run lint:frontend",
+    "lint:backend": "cd backend && npm run lint",
+    "lint:frontend": "cd frontend && npm run lint",
+    "lint:fix": "npm run lint:fix:backend && npm run lint:fix:frontend",
+    "lint:fix:backend": "cd backend && npm run lint:fix",
+    "lint:fix:frontend": "cd frontend && npm run lint:fix",
+    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "clean": "rm -rf node_modules backend/node_modules frontend/node_modules backend/dist frontend/dist"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "husky": "^8.0.3",
+    "lint-staged": "^15.1.0"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "backend/src/**/*.{ts,tsx}": [
+      "cd backend && npm run lint:fix",
+      "git add"
+    ],
+    "frontend/src/**/*.{ts,tsx}": [
+      "cd frontend && npm run lint:fix",
+      "git add"
+    ]
+  },
+  "keywords": [
+    "oficina",
+    "motos",
+    "gestao",
+    "sistema",
+    "react",
+    "nodejs",
+    "typescript"
+  ],
+  "author": "Sistema Oficina Motos",
+  "license": "MIT"
+}

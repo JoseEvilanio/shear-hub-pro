@@ -1,0 +1,75 @@
+  // Dados simulados de fornecedores
+  const [suppliers, setSuppliers] = useState([
+    {
+      id: 1,
+      name: 'Distribuidora Peças Moto Ltda',
+      cnpj: '12.345.678/0001-90',
+      ie: '123.456.789.123',
+      phone: '(11) 3333-4444',
+      email: 'vendas@distribuidorapecas.com.br',
+      website: 'www.distribuidorapecas.com.br',
+      category: 'Peças e Componentes',
+      status: 'Ativo',
+      address: {
+        street: 'Rua das Peças, 1000',
+        city: 'São Paulo',
+        state: 'SP',
+        zipCode: '01234-567',
+        neighborhood: 'Centro'
+      },
+      contact: {
+        name: 'João Vendedor',
+        position: 'Gerente Comercial',
+        phone: '(11) 99999-1111',
+        email: 'joao@distribuidorapecas.com.br'
+      },
+      paymentTerms: {
+        condition: '30 dias',
+        discount: '2% à vista',
+        creditLimit: 50000.00
+      },
+      products: ['Filtros', 'Óleos', 'Pastilhas de Freio', 'Correntes'],
+      totalPurchases: 125000.00,
+      lastPurchase: '2024-08-10',
+      rating: 4.8,
+      notes: 'Fornecedor principal de peças originais. Entrega rápida e qualidade garantida.'
+    }
+  ]);
+
+  return (
+    <div className="px-4 sm:px-6 lg:px-8 py-8">
+      <div className="mb-8">
+        <div className="bg-gradient-to-r from-purple-600 via-purple-700 to-indigo-700 rounded-2xl shadow-xl p-8 text-white">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <div className="h-12 w-12 rounded-xl bg-white bg-opacity-20 flex items-center justify-center mr-4">
+                <Icons.Package className="h-6 w-6" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold">Fornecedores</h1>
+                <p className="text-purple-100 mt-1">Gestão de Parceiros Comerciais</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-sm text-purple-200">Total de Fornecedores</div>
+              <div className="text-2xl font-bold">{suppliers.length}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
+        <Icons.Package className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+        <h3 className="text-lg font-medium text-gray-900 mb-2">Página de Fornecedores</h3>
+        <p className="text-gray-500 mb-6">Funcionalidade em desenvolvimento.</p>
+        <button
+          onClick={() => alert('Funcionalidade em desenvolvimento')}
+          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700"
+        >
+          <Icons.Plus className="h-4 w-4 mr-2" />
+          Cadastrar Fornecedor
+        </button>
+      </div>
+    </div>
+  );
+};

@@ -1,0 +1,213 @@
+# Regras de Alerta - Prometheus
+# Sistema de Gestão de Oficina Mecânica de Motos
+
+groups:
+  # Alertas de disponibilidade
+  - name: availability
+    rules:
+      - alert: ServiceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Serviço {{ $labels.job }} está indisponível"
+          description: "O serviço {{ $labels.job }} na instância {{ $labels.instance }} está indisponível há mais de 1 minuto."
+
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Alta taxa de erro no serviço {{ $labels.job }}"
+          description: "Taxa de erro de {{ $value | humanizePercentage }} no serviço {{ $labels.job }}."
+
+      - alert: SlowResponseTime
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Tempo de resposta lento no serviço {{ $labels.job }}"
+          description: "95% das requisições estão levando mais de 2 segundos para responder."
+
+  # Alertas de recursos do sistema
+  - name: system_resources
+    rules:
+      - alert: HighCPUUsage
+        expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Alto uso de CPU na instância {{ $labels.instance }}"
+          description: "CPU está {{ $value | humanizePercentage }} utilizada há mais de 5 minutos."
+
+      - alert: HighMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Alto uso de memória na instância {{ $labels.instance }}"
+          description: "Memória está {{ $value | humanizePercentage }} utilizada há mais de 5 minutos."
+
+      - alert: LowDiskSpace
+        expr: (1 - (node_filesystem_avail_bytes / node_filesystem_size_bytes)) * 100 > 90
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Pouco espaço em disco na instância {{ $labels.instance }}"
+          description: "Disco {{ $labels.mountpoint }} está {{ $value | humanizePercentage }} cheio."
+
+  # Alertas de banco de dados
+  - name: database
+    rules:
+      - alert: PostgreSQLDown
+        expr: pg_up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "PostgreSQL está indisponível"
+          description: "PostgreSQL na instância {{ $labels.instance }} está indisponível há mais de 1 minuto."
+
+      - alert: PostgreSQLTooManyConnections
+        expr: sum by (instance) (pg_stat_activity_count) > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Muitas conexões no PostgreSQL"
+          description: "PostgreSQL tem {{ $value }} conexões ativas, próximo do limite."
+
+      - alert: PostgreSQLSlowQueries
+        expr: rate(pg_stat_activity_max_tx_duration[5m]) > 60
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Queries lentas no PostgreSQL"
+          description: "Detectadas queries executando por mais de 60 segundos."
+
+      - alert: PostgreSQLHighReplicationLag
+        expr: pg_replication_lag > 30
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Alto lag de replicação no PostgreSQL"
+          description: "Lag de replicação é de {{ $value }} segundos."
+
+  # Alertas de aplicação
+  - name: application
+    rules:
+      - alert: HighRequestRate
+        expr: rate(http_requests_total[5m]) > 100
+        for: 5m
+        labels:
+          severity: info
+        annotations:
+          summary: "Alta taxa de requisições"
+          description: "Recebendo {{ $value }} requisições por segundo."
+
+      - alert: DatabaseConnectionPoolExhausted
+        expr: db_connection_pool_active / db_connection_pool_max > 0.9
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Pool de conexões do banco quase esgotado"
+          description: "{{ $value | humanizePercentage }} do pool de conexões está em uso."
+
+      - alert: FailedLogins
+        expr: increase(failed_login_attempts_total[5m]) > 10
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Muitas tentativas de login falharam"
+          description: "{{ $value }} tentativas de login falharam nos últimos 5 minutos."
+
+      - alert: LowInventoryStock
+        expr: inventory_low_stock_items > 5
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Muitos produtos com estoque baixo"
+          description: "{{ $value }} produtos estão com estoque baixo."
+
+  # Alertas de negócio
+  - name: business
+    rules:
+      - alert: NoSalesToday
+        expr: increase(sales_total[24h]) == 0
+        for: 1h
+        labels:
+          severity: warning
+        annotations:
+          summary: "Nenhuma venda registrada hoje"
+          description: "Não foram registradas vendas nas últimas 24 horas."
+
+      - alert: HighServiceOrderBacklog
+        expr: service_orders_pending > 20
+        for: 30m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Muitas ordens de serviço pendentes"
+          description: "{{ $value }} ordens de serviço estão pendentes."
+
+      - alert: OverduePayments
+        expr: accounts_receivable_overdue_amount > 5000
+        for: 1h
+        labels:
+          severity: warning
+        annotations:
+          summary: "Alto valor em pagamentos em atraso"
+          description: "R$ {{ $value }} em pagamentos estão em atraso."
+
+  # Alertas de segurança
+  - name: security
+    rules:
+      - alert: SuspiciousActivity
+        expr: rate(http_requests_total{status="401"}[5m]) > 5
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Atividade suspeita detectada"
+          description: "{{ $value }} tentativas de acesso não autorizado por segundo."
+
+      - alert: UnusualTrafficPattern
+        expr: rate(http_requests_total[5m]) > 2 * rate(http_requests_total[1h] offset 1h)
+        for: 10m
+        labels:
+          severity: info
+        annotations:
+          summary: "Padrão de tráfego incomum"
+          description: "Tráfego atual é {{ $value }}x maior que o normal."
+
+  # Alertas de backup
+  - name: backup
+    rules:
+      - alert: BackupFailed
+        expr: time() - backup_last_success_timestamp > 86400
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Backup não executado nas últimas 24 horas"
+          description: "Último backup bem-sucedido foi há {{ $value | humanizeDuration }}."
+
+      - alert: BackupSizeUnusual
+        expr: abs(backup_size_bytes - backup_size_bytes offset 24h) / backup_size_bytes offset 24h > 0.5
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Tamanho do backup muito diferente do usual"
+          description: "Tamanho do backup variou {{ $value | humanizePercentage }} em relação ao dia anterior."

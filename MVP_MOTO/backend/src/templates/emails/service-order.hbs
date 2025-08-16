@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ordem de Serviço</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background-color: #059669;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+        }
+        .content {
+            background-color: #f0fdf4;
+            padding: 20px;
+            border: 1px solid #bbf7d0;
+        }
+        .footer {
+            background-color: #064e3b;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            border-radius: 0 0 8px 8px;
+            font-size: 14px;
+        }
+        .info-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: white;
+            border-radius: 6px;
+            border-left: 4px solid #059669;
+        }
+        .status-badge {
+            display: inline-block;
+            background-color: #fbbf24;
+            color: #92400e;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .highlight {
+            background-color: #059669;
+            color: white;
+            padding: 15px;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        .text-muted {
+            color: #6b7280;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>{{companyName}}</h1>
+        <p>Ordem de Serviço</p>
+    </div>
+
+    <div class="content">
+        <div class="info-section">
+            <h3>Informações do Cliente</h3>
+            <p><strong>Cliente:</strong> {{customerName}}</p>
+            <p><strong>Número da OS:</strong> {{orderNumber}}</p>
+            <p><strong>Data de Abertura:</strong> {{orderDate}}</p>
+        </div>
+
+        <div class="info-section">
+            <h3>Informações do Veículo</h3>
+            <p><strong>Veículo:</strong> {{vehicleInfo}}</p>
+        </div>
+
+        <div class="info-section">
+            <h3>Descrição do Serviço</h3>
+            <p>{{description}}</p>
+        </div>
+
+        <div class="info-section">
+            <h3>Responsável Técnico</h3>
+            <p><strong>Mecânico:</strong> {{mechanicName}}</p>
+            <p><strong>Previsão de Conclusão:</strong> {{estimatedCompletion}}</p>
+        </div>
+
+        <div class="highlight">
+            <p>Valor Total: {{totalAmount}}</p>
+        </div>
+
+        <div class="text-center">
+            <p class="text-muted">
+                Acompanhe o status do seu serviço entrando em contato conosco.
+            </p>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p><strong>{{companyName}}</strong></p>
+        {{#if companyPhone}}<p>Telefone: {{companyPhone}}</p>{{/if}}
+        {{#if companyAddress}}<p>{{companyAddress}}</p>{{/if}}
+        <p class="text-muted">Este é um email automático, não responda.</p>
+    </div>
+</body>
+</html>

@@ -1,0 +1,153 @@
+{
+  "data": {
+    "items": [
+      {
+        "id": "1",
+        "productId": "1",
+        "productName": "Óleo Motor 20W50",
+        "productCode": "OIL001",
+        "productBarcode": "7891234567890",
+        "category": "Lubrificantes",
+        "currentStock": 45,
+        "minStock": 10,
+        "maxStock": 100,
+        "reservedStock": 0,
+        "availableStock": 45,
+        "unitCost": 18.50,
+        "unitPrice": 25.90,
+        "totalValue": 832.50,
+        "lastMovement": "2024-01-20T08:00:00.000Z",
+        "status": "normal",
+        "supplier": "Distribuidora ABC",
+        "location": "A1-01",
+        "movements": [
+          {
+            "id": "1",
+            "type": "in",
+            "quantity": 50,
+            "unitCost": 18.50,
+            "totalCost": 925.00,
+            "reason": "purchase",
+            "reference": "NF-12345",
+            "userId": "1",
+            "userName": "Admin Teste",
+            "createdAt": "2024-01-15T09:00:00.000Z"
+          },
+          {
+            "id": "2",
+            "type": "out",
+            "quantity": 5,
+            "reason": "sale",
+            "reference": "VD-2024-001",
+            "userId": "1",
+            "userName": "Admin Teste",
+            "createdAt": "2024-01-20T14:30:00.000Z"
+          }
+        ]
+      },
+      {
+        "id": "2",
+        "productId": "2",
+        "productName": "Filtro de Ar Honda CG",
+        "productCode": "FIL001",
+        "productBarcode": "7891234567891",
+        "category": "Filtros",
+        "currentStock": 12,
+        "minStock": 5,
+        "maxStock": 50,
+        "reservedStock": 2,
+        "availableStock": 10,
+        "unitCost": 10.20,
+        "unitPrice": 15.50,
+        "totalValue": 122.40,
+        "lastMovement": "2024-01-18T10:30:00.000Z",
+        "status": "normal",
+        "supplier": "Peças Honda",
+        "location": "B2-05",
+        "movements": [
+          {
+            "id": "3",
+            "type": "in",
+            "quantity": 20,
+            "unitCost": 10.20,
+            "totalCost": 204.00,
+            "reason": "purchase",
+            "reference": "NF-54321",
+            "userId": "1",
+            "userName": "Admin Teste",
+            "createdAt": "2024-01-10T11:00:00.000Z"
+          },
+          {
+            "id": "4",
+            "type": "out",
+            "quantity": 8,
+            "reason": "service_order",
+            "reference": "OS-2024-001",
+            "userId": "1",
+            "userName": "Admin Teste",
+            "createdAt": "2024-01-18T10:30:00.000Z"
+          }
+        ]
+      },
+      {
+        "id": "3",
+        "productId": "3",
+        "productName": "Pastilha de Freio Dianteira",
+        "productCode": "BRK001",
+        "productBarcode": "7891234567892",
+        "category": "Freios",
+        "currentStock": 3,
+        "minStock": 8,
+        "maxStock": 30,
+        "reservedStock": 0,
+        "availableStock": 3,
+        "unitCost": 22.00,
+        "unitPrice": 35.00,
+        "totalValue": 66.00,
+        "lastMovement": "2024-01-22T16:45:00.000Z",
+        "status": "low_stock",
+        "supplier": "Freios Brasil",
+        "location": "C1-03",
+        "movements": [
+          {
+            "id": "5",
+            "type": "in",
+            "quantity": 15,
+            "unitCost": 22.00,
+            "totalCost": 330.00,
+            "reason": "purchase",
+            "reference": "NF-98765",
+            "userId": "1",
+            "userName": "Admin Teste",
+            "createdAt": "2024-01-05T14:00:00.000Z"
+          },
+          {
+            "id": "6",
+            "type": "out",
+            "quantity": 12,
+            "reason": "sale",
+            "reference": "VD-2024-002",
+            "userId": "1",
+            "userName": "Admin Teste",
+            "createdAt": "2024-01-22T16:45:00.000Z"
+          }
+        ]
+      }
+    ],
+    "pagination": {
+      "page": 1,
+      "limit": 20,
+      "total": 3,
+      "totalPages": 1,
+      "hasNext": false,
+      "hasPrev": false
+    },
+    "summary": {
+      "totalProducts": 3,
+      "totalValue": 1020.90,
+      "lowStockCount": 1,
+      "outOfStockCount": 0,
+      "normalStockCount": 2
+    }
+  }
+}

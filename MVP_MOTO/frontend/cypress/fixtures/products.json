@@ -1,0 +1,68 @@
+{
+  "data": {
+    "items": [
+      {
+        "id": "1",
+        "name": "Óleo Motor 20W50",
+        "code": "OIL001",
+        "barcode": "7891234567890",
+        "category": "Lubrificantes",
+        "description": "Óleo mineral para motores 4 tempos",
+        "unitPrice": 25.90,
+        "costPrice": 18.50,
+        "minStock": 10,
+        "currentStock": 45,
+        "unit": "Litro",
+        "supplier": "Distribuidora ABC",
+        "imageUrl": null,
+        "active": true,
+        "createdAt": "2024-01-01T00:00:00.000Z",
+        "updatedAt": "2024-01-01T00:00:00.000Z"
+      },
+      {
+        "id": "2",
+        "name": "Filtro de Ar Honda CG",
+        "code": "FIL001",
+        "barcode": "7891234567891",
+        "category": "Filtros",
+        "description": "Filtro de ar para Honda CG 125/150/160",
+        "unitPrice": 15.50,
+        "costPrice": 10.20,
+        "minStock": 5,
+        "currentStock": 12,
+        "unit": "Peça",
+        "supplier": "Peças Honda",
+        "imageUrl": null,
+        "active": true,
+        "createdAt": "2024-01-02T00:00:00.000Z",
+        "updatedAt": "2024-01-02T00:00:00.000Z"
+      },
+      {
+        "id": "3",
+        "name": "Pastilha de Freio Dianteira",
+        "code": "BRK001",
+        "barcode": "7891234567892",
+        "category": "Freios",
+        "description": "Pastilha de freio dianteira universal",
+        "unitPrice": 35.00,
+        "costPrice": 22.00,
+        "minStock": 8,
+        "currentStock": 3,
+        "unit": "Par",
+        "supplier": "Freios Brasil",
+        "imageUrl": null,
+        "active": true,
+        "createdAt": "2024-01-03T00:00:00.000Z",
+        "updatedAt": "2024-01-03T00:00:00.000Z"
+      }
+    ],
+    "pagination": {
+      "page": 1,
+      "limit": 20,
+      "total": 3,
+      "totalPages": 1,
+      "hasNext": false,
+      "hasPrev": false
+    }
+  }
+}
