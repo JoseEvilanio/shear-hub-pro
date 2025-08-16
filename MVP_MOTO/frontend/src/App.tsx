@@ -58,6 +58,11 @@ const Icons = {
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
     </svg>
   ),
+  Building: () => (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+    </svg>
+  ),
   Plus: () => (
     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -339,6 +344,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
   const navItems = [
     { path: '/', label: 'Dashboard', icon: Icons.Dashboard, badge: null },
     { path: '/clients', label: 'Clientes', icon: Icons.Users, badge: null },
+    { path: '/suppliers', label: 'Fornecedores', icon: Icons.Building, badge: null },
     { path: '/products', label: 'Produtos', icon: Icons.Package, badge: 'Novo' },
     { path: '/services', label: 'Serviços', icon: Icons.Tool, badge: null },
     { path: '/vehicles', label: 'Veículos', icon: Icons.Motorcycle, badge: null },
